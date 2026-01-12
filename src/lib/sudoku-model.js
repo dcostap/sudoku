@@ -4,6 +4,7 @@ import { SudokuHinter } from './sudoku-hinter';
 import { cellSet, cellProp } from './sudoku-cell-sets';
 import SudokuExplainer from './sudoku-explainer';
 import { expandPuzzleDigits, compressPuzzleDigits } from './string-utils';
+import { loadNYTPuzzles } from './nyt-puzzle-loader';
 
 import {
     MODAL_TYPE_WELCOME,
@@ -217,25 +218,6 @@ export const modelHelpers = {
         return new SudokuHinter(cells);
     },
 
-    loadCachedRecentlyShared: () => {
-        let cachedPuzzles;
-        try {
-            const cachedPuzzlesJSON = window.localStorage.getItem('recentlyShared') || '{}';
-            cachedPuzzles = JSON.parse(cachedPuzzlesJSON);
-        }
-        catch {
-            // ignore errors
-        };
-        return cachedPuzzles;
-    },
-
-    saveCachedRecentlyShared: (recentData) => {
-        const recentDataJSON = JSON.stringify({
-            data: recentData,
-            time: Date.now(),
-        });
-        window.localStorage.setItem('recentlyShared', recentDataJSON);
-    },
 
     syncSettingsToDom: (settings) => {
         if (settings[SETTINGS.darkMode]) {
@@ -353,79 +335,12 @@ export const modelHelpers = {
         }));
     },
 
-    fetchRecentlyShared: (grid, setGrid, fetchDelay) => {
-        const modalState = grid.get('modalState');
-        delete modalState.fetchRequired;    // Naughty, but we don't want a re-render
-        const setRecentlySharedData = data => {
-            setGrid(grid => {
-                const modalState = grid.get('modalState') || {};
-                if (modalState.modalType === MODAL_TYPE_WELCOME) {
-                    return grid.set('modalState', {
-                        modalType: MODAL_TYPE_WELCOME,
-                        recentlyShared: data,
-                        showRatings: modalState.showRatings,
-                        savedPuzzles: modalState.savedPuzzles,
-                        shortenLinks: modalState.shortenLinks,
-                    });
-                }
-                else {
-                    return grid;    // user has moved on, silently discard response
-                }
-            });
-        };
-        const fetchHandler = () => {
-            fetch('/recently-shared')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`${response.status} ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    modelHelpers.saveCachedRecentlyShared(data);
-                    setRecentlySharedData(data);
-                })
-                .catch(error => setGrid(grid => {
-                    const modalState = grid.get('modalState') || {};
-                    if (modalState.modalType === MODAL_TYPE_WELCOME) {
-                        return grid.set('modalState', {
-                            modalType: MODAL_TYPE_WELCOME,
-                            loadingFailed: true,
-                            errorMessage: error.toString(),
-                            showRatings: modalState.showRatings,
-                            savedPuzzles: modalState.savedPuzzles,
-                            shortenLinks: modalState.shortenLinks,
-                        });
-                    }
-                    else {
-                        return grid;    // user has moved on, silently discard response
-                    }
-                }));
-        };
-        const cachedPuzzles = modelHelpers.loadCachedRecentlyShared();
-        if (cachedPuzzles && cachedPuzzles.data) {
-            const cacheAge = (Date.now() - cachedPuzzles.time) / 1000;
-            if (cacheAge < 3600) {
-                setRecentlySharedData(cachedPuzzles.data);
-                if (cacheAge < 60) {
-                    return;
-                }
-                fetchDelay = 1;
-            }
-        }
-        setTimeout(fetchHandler, fetchDelay);
-    },
 
     findDifficultyRating: (initialDigits) => {
-        const cachedPuzzles = modelHelpers.loadCachedRecentlyShared();
-        if (cachedPuzzles && cachedPuzzles.data) {
-            const reducer = (acc, list) => {
-                const m = list.find(p => p.digits === initialDigits);
-                return m ? m.difficulty : acc;
-            };
-            return Object.values(cachedPuzzles.data).reduce(reducer, null);
-        }
-        return null;
+        // Search in loaded NYT puzzles for difficulty rating
+        const nytPuzzles = loadNYTPuzzles();
+        const match = nytPuzzles.find(p => p.digits === initialDigits);
+        return match ? match.difficulty : null;
     },
 
     fetchExplainPlan: (grid, setGrid, retryInterval, maxRetries) => {
@@ -881,8 +796,7 @@ export const modelHelpers = {
     showWelcomeModal: (grid) => {
         return grid.set('modalState', {
             modalType: MODAL_TYPE_WELCOME,
-            loading: true,
-            fetchRequired: true,
+            nytPuzzles: loadNYTPuzzles(),
             showRatings: modelHelpers.getSetting(grid, SETTINGS.showRatings),
             savedPuzzles: modelHelpers.getSavedPuzzles(grid),
             shortenLinks: modelHelpers.getSetting(grid, SETTINGS.shortenLinks),

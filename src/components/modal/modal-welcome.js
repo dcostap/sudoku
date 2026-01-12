@@ -1,68 +1,109 @@
 import { useState } from 'react';
 
-import { modelHelpers } from '../../lib/sudoku-model';
 import { compressPuzzleDigits } from '../../lib/string-utils';
 
 import SudokuMiniGrid from '../sudoku-grid/sudoku-mini-grid';
-import Spinner from '../spinner/spinner';
 
 function stopPropagation (e) {
     e.stopPropagation();
 }
 
-function RecentlySharedSection ({level, puzzles, showRatings, shortenLinks}) {
-    const [collapsed, setCollapsed] = useState(true);
-    const levelName = modelHelpers.difficultyLevelName(level);
-    if (!levelName || !puzzles || puzzles.length < 1) {
-        return null;
-    }
-    const puzzleLinks = puzzles.map((puzzle, i) => {
-        const puzzleString = shortenLinks
-            ? compressPuzzleDigits(puzzle.digits || puzzle)
-            : (puzzle.digits || puzzle);
-        return (
-            <li key={i}>
-                <a href={`./?s=${puzzleString}&d=${level}&i=${i+1}`} onClick={stopPropagation}>
-                    <SudokuMiniGrid puzzle={puzzle} showRatings={showRatings} />
-                </a>
-            </li>
-        );
-    })
-    const classes = `section ${collapsed ? 'collapsed' : ''}`;
-    const clickHandler = () => setCollapsed(old => !old);
+function NYTPuzzleItem({ puzzle, showRatings, shortenLinks }) {
+    const puzzleString = shortenLinks
+        ? compressPuzzleDigits(puzzle.digits)
+        : puzzle.digits;
+
+    // Map difficulty to level number for URL compatibility
+    const difficultyLevelMap = {
+        'easy': '1',
+        'medium': '2',
+        'hard': '3',
+        'expert': '4',
+    };
+    const level = difficultyLevelMap[puzzle.difficulty] || '3';
+
+    // Format date as "May 13, 2023"
+    const dateStr = puzzle.date
+        ? puzzle.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+        : '';
+
+    const difficultyBadge = puzzle.difficulty
+        ? <span className={`difficulty-badge ${puzzle.difficulty}`}>{puzzle.difficulty}</span>
+        : null;
+
     return (
-        <div className={classes} onClick={clickHandler}>
-            <h2>{levelName}</h2>
-            <ul>
-                {puzzleLinks}
-            </ul>
-        </div>
+        <li>
+            <a href={`./?s=${puzzleString}&d=${level}`} onClick={stopPropagation}>
+                <div className="nyt-puzzle-item">
+                    <SudokuMiniGrid puzzle={puzzle} showRatings={showRatings} />
+                    <div className="nyt-puzzle-info">
+                        <div className="nyt-puzzle-date">{dateStr}</div>
+                        {difficultyBadge}
+                    </div>
+                </div>
+            </a>
+        </li>
     );
 }
 
+function groupPuzzlesByMonth(puzzles) {
+    const groups = {};
+    puzzles.forEach(puzzle => {
+        if (!puzzle.date) return;
 
-function RecentlyShared({modalState}) {
-    if (modalState.loadingFailed) {
+        const monthYear = puzzle.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+        if (!groups[monthYear]) {
+            groups[monthYear] = [];
+        }
+        groups[monthYear].push(puzzle);
+    });
+    return groups;
+}
+
+function NYTPuzzleList({ modalState }) {
+    const [collapsed, setCollapsed] = useState({});
+    const { nytPuzzles, showRatings, shortenLinks } = modalState;
+
+    if (!nytPuzzles || nytPuzzles.length === 0) {
         return (
-            <div className="loading-failed">Failed to load details of recently shared
-            puzzles ({modalState.errorMessage})</div>
+            <div className="nyt-puzzles-empty">
+                No NYT puzzles found. Please check the nyt-scraper/sudoku directory.
+            </div>
         );
     }
-    else if (modalState.loading) {
-        return <Spinner />;
-    }
-    const {recentlyShared} = modalState;
-    const sections = ['1', '2', '3', '4'].map(level => {
-        return <RecentlySharedSection
-            key={level}
-            level={level}
-            puzzles={recentlyShared[level]}
-            showRatings={modalState.showRatings}
-            shortenLinks={modalState.shortenLinks}
-        />;
+
+    const puzzlesByMonth = groupPuzzlesByMonth(nytPuzzles);
+    const monthNames = Object.keys(puzzlesByMonth);
+
+    const sections = monthNames.map((monthName, idx) => {
+        const isCollapsed = collapsed[monthName] !== undefined ? collapsed[monthName] : (idx > 0);
+        const puzzles = puzzlesByMonth[monthName];
+
+        const puzzleItems = puzzles.map((puzzle, i) => (
+            <NYTPuzzleItem
+                key={puzzle.id || i}
+                puzzle={puzzle}
+                showRatings={showRatings}
+                shortenLinks={shortenLinks}
+            />
+        ));
+
+        const toggleCollapsed = () => {
+            setCollapsed(prev => ({ ...prev, [monthName]: !isCollapsed }));
+        };
+
+        const classes = `section nyt-month-section ${isCollapsed ? 'collapsed' : ''}`;
+
+        return (
+            <div key={monthName} className={classes} onClick={toggleCollapsed}>
+                <h2>{monthName} <span className="puzzle-count">({puzzles.length})</span></h2>
+                <ul>{puzzleItems}</ul>
+            </div>
+        );
     });
+
     return (
-        <div className="recently-shared">
+        <div className="nyt-puzzles">
             {sections}
         </div>
     );
@@ -107,8 +148,8 @@ function ModalWelcome({modalState, modalHandler}) {
                     <SavedPuzzlesButton savedPuzzles={savedPuzzles} modalHandler={modalHandler} />
                 </span>
             </div>
-            <p>Or you can select a recently shared puzzle:</p>
-            <RecentlyShared modalState={modalState} />
+            <p>Or select an NYT puzzle:</p>
+            <NYTPuzzleList modalState={modalState} />
             <div id="welcome-footer">
                 <p>Follow <a href={twitterUrl} target="_blank" rel="noreferrer">@SudokuExchange</a> on Twitter for updates.</p>
             </div>

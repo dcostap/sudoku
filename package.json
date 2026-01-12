@@ -26,7 +26,10 @@
     "save-svg-as-png": "1.4.17"
   },
   "scripts": {
+    "generate-puzzles": "node scripts/generate-puzzle-data.js",
+    "prestart": "npm run generate-puzzles",
     "start": "react-scripts start",
+    "prebuild": "npm run generate-puzzles",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

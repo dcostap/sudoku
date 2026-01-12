@@ -222,6 +222,135 @@
     background-color: transparent;
 }
 
+/* NYT Puzzle List Styles */
+.nyt-puzzles {
+    margin-top: 0.5em;
+}
+
+.nyt-puzzles-empty {
+    color: var(--error-text-color);
+    font-style: italic;
+    opacity: 0.8;
+    margin: 1.5em 1.5em 2em;
+}
+
+.nyt-month-section {
+    margin: 0.5em 0;
+}
+
+.nyt-month-section h2 {
+    font-size: 1.5rem;
+    margin: 0.9em 0 0 0;
+    cursor: pointer;
+}
+
+.nyt-month-section h2::before {
+    content: '\25BE';
+    display: inline-block;
+    padding-right: 0.3em;
+    vertical-align: top;
+    line-height: 0.9;
+}
+
+.nyt-month-section.collapsed h2::before {
+    content: '\25B8';
+    line-height: 0.8;
+}
+
+.nyt-month-section .puzzle-count {
+    font-size: 0.8em;
+    opacity: 0.7;
+    font-weight: normal;
+}
+
+.nyt-month-section ul {
+    max-height: 700px;
+    overflow: hidden;
+    margin: 0.2em 0 0 0;
+    padding: 0 0 0 0.7em;
+    opacity: 1;
+    transition: all 600ms;
+}
+
+.nyt-month-section.collapsed ul {
+    margin-top: 0;
+    max-height: 0;
+    opacity: 0;
+}
+
+.nyt-month-section li,
+.nyt-month-section li a,
+.nyt-month-section li svg,
+.nyt-month-section li div {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.nyt-puzzle-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.nyt-puzzle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+    font-size: 0.85rem;
+}
+
+.nyt-puzzle-date {
+    font-weight: 500;
+}
+
+.difficulty-badge {
+    display: inline-block;
+    padding: 0.15em 0.5em;
+    border-radius: 0.25em;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.difficulty-badge.easy {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.difficulty-badge.medium {
+    background-color: #FF9800;
+    color: white;
+}
+
+.difficulty-badge.hard {
+    background-color: #F44336;
+    color: white;
+}
+
+.difficulty-badge.expert {
+    background-color: #9C27B0;
+    color: white;
+}
+
+.nyt-month-section svg {
+    border-radius: 4px;
+}
+
+.nyt-month-section a {
+    border: 2px solid transparent;
+    border-radius: 4px;
+    text-decoration: none;
+    line-height: 0;
+}
+
+.nyt-month-section a:hover {
+    border: 2px solid var(--link-hover-text-color);
+    background-color: transparent;
+}
+
+
 #welcome-footer {
     margin-top: 2em;
     border-top: 1px solid var(--modal-text-color);
