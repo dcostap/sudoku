@@ -13,7 +13,7 @@ const stopPropagation = (e) => e.stopPropagation();
 function SiteLink () {
     return (
         <div className="site-link">
-            <a href="https://sudokuexchange.com/">
+            <a href="/">
                 <svg className="site-domain-image" version="1.1" viewBox="0 0 650 120" title="SudokuExchange.com">
                     <use href="#site-domain" />
                 </svg>

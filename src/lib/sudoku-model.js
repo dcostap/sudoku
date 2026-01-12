@@ -7,7 +7,6 @@ import { expandPuzzleDigits, compressPuzzleDigits } from './string-utils';
 import { loadNYTPuzzles } from './nyt-puzzle-loader';
 
 import {
-    MODAL_TYPE_WELCOME,
     MODAL_TYPE_SAVED_PUZZLES,
     MODAL_TYPE_RESUME_OR_RESTART,
     MODAL_TYPE_INVALID_INITIAL_DIGITS,
@@ -138,6 +137,7 @@ export function newSudokuModel({initialDigits, difficultyLevel, onPuzzleStateCha
 };
 
 function actionsBlocked(grid) {
+    if (!grid) return false;
     return grid.get('solved') || (grid.get('modalState') !== undefined);
 }
 
@@ -311,8 +311,9 @@ export const modelHelpers = {
         let modalState = undefined;
         if (initialError.noStartingDigits) {
             modelHelpers.pruneSavedState(grid);
-            grid = modelHelpers.showWelcomeModal(grid);
-            modalState = grid.get('modalState');
+            // Redirect to home page instead of showing modal
+            window.location.href = window.location.href.replace(/[?#].*$/, "");
+            return grid;
         }
         else if (initialError.insufficientDigits) {
             modalState = {
@@ -793,14 +794,8 @@ export const modelHelpers = {
         return grid.set('cells', newCells);
     },
 
-    showWelcomeModal: (grid) => {
-        return grid.set('modalState', {
-            modalType: MODAL_TYPE_WELCOME,
-            nytPuzzles: loadNYTPuzzles(),
-            showRatings: modelHelpers.getSetting(grid, SETTINGS.showRatings),
-            savedPuzzles: modelHelpers.getSavedPuzzles(grid),
-            shortenLinks: modelHelpers.getSetting(grid, SETTINGS.shortenLinks),
-        });
+    redirectToHome: () => {
+        window.location.href = window.location.href.replace(/[?#].*$/, "");
     },
 
     confirmRestart: (grid) => {
@@ -831,7 +826,8 @@ export const modelHelpers = {
         }
         const {savedPuzzles} = oldModalState;
         if (!savedPuzzles || savedPuzzles.length === 0) {
-            return modelHelpers.showWelcomeModal(grid);
+            modelHelpers.redirectToHome();
+            return grid;
         }
         return grid.set('modalState', {
             ...oldModalState,
@@ -956,7 +952,8 @@ export const modelHelpers = {
             return grid;
         }
         else if (action === 'cancel-paste') {
-            return modelHelpers.showWelcomeModal(grid);
+            modelHelpers.redirectToHome();
+            return grid;
         }
         else if (action === 'cancel-solver') {
             return modelHelpers.saveSolverPreferences(grid, args.passProgress);
@@ -966,7 +963,8 @@ export const modelHelpers = {
             return grid;
         }
         else if (action === 'show-welcome-modal') {
-            return modelHelpers.showWelcomeModal(grid);
+            modelHelpers.redirectToHome();
+            return grid;
         }
         else if (action === 'show-saved-puzzles-modal') {
             return modelHelpers.showSavedPuzzlesModal(grid, oldModalState);
@@ -1076,6 +1074,7 @@ export const modelHelpers = {
     },
 
     handleVisibilityChange: (grid, isVisible) => {
+        if (!grid) return grid;
         if (grid.get('solved') || grid.get('modalState')) {
             return grid;
         }
@@ -1116,7 +1115,8 @@ export const modelHelpers = {
             puzzleState =  JSON.parse(puzzleStateJson);
         } catch (e) {
             localStorage.removeItem(puzzleStateKey);
-            return modelHelpers.showWelcomeModal(grid);
+            modelHelpers.redirectToHome();
+            return grid;
         }
         const {initialDigits, currentSnapshot} = puzzleState;
         grid = grid.merge({
@@ -1691,6 +1691,7 @@ export const modelHelpers = {
     },
 
     setTempInputMode: (grid, newMode) => {
+        if (!grid) return grid;
         if (actionsBlocked(grid)) {
             return grid;
         }
@@ -1701,6 +1702,7 @@ export const modelHelpers = {
     },
 
     clearTempInputMode: (grid) => {
+        if (!grid) return grid;
         return grid.set('tempInputMode', undefined);
     },
 

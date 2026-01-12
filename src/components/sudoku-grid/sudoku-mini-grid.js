@@ -7,6 +7,11 @@ function DifficultyIndicator ({difficulty, showRatings}) {
     if (difficulty === undefined) {
         return null;
     }
+    // Convert to number and validate
+    const difficultyNum = typeof difficulty === 'number' ? difficulty : parseFloat(difficulty);
+    if (isNaN(difficultyNum)) {
+        return null;
+    }
     const barHeight = showRatings ? 90 : 25;
     const textContent = showRatings
         ? (
@@ -19,7 +24,7 @@ function DifficultyIndicator ({difficulty, showRatings}) {
             >{difficulty}</text>
         )
         : null;
-    const barWidth = Math.max(120, Math.min(difficulty, 10) * 90);
+    const barWidth = Math.max(120, Math.min(difficultyNum, 10) * 90);
 
     return <g>
         <rect className="difficulty-bar" x="50" y="990" width={barWidth} height={barHeight} />

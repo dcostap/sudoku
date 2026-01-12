@@ -4,6 +4,7 @@ import {saveSvgAsPng} from 'save-svg-as-png';
 
 import { newSudokuModel, modelHelpers, SETTINGS } from '../../lib/sudoku-model.js';
 import useWindowSize from '../../lib/use-window-size.js';
+import { loadNYTPuzzles } from '../../lib/nyt-puzzle-loader.js';
 
 import SvgSprites from '../svg-sprites/svg-sprites';
 import StatusBar from '../status-bar/status-bar';
@@ -11,9 +12,9 @@ import SudokuGrid from '../sudoku-grid/sudoku-grid';
 import VirtualKeyboard from '../virtual-keyboard/virtual-keyboard';
 import SolvedPuzzleOptions from '../solved-puzzle-options/solved-puzzle-options';
 import ModalContainer from '../modal/modal-container';
+import HomePage from '../home-page/home-page';
 
 import {
-    MODAL_TYPE_WELCOME,
     MODAL_TYPE_RESUME_OR_RESTART,
     MODAL_TYPE_HINT
 } from '../../lib/modal-types';
@@ -31,8 +32,15 @@ const inputModeFromHotKey = {
 
 function initialGridFromURL () {
     const params = new URLSearchParams(window.location.search);
+    const initialDigits = params.get('s');
+    
+    // If no puzzle is specified, return null to show the home page
+    if (!initialDigits) {
+        return null;
+    }
+    
     let grid = newSudokuModel({
-        initialDigits: params.get('s'),
+        initialDigits: initialDigits,
         difficultyLevel: params.get('d'),
         onPuzzleStateChange: grid => {
             document.body.dataset.currentSnapshot = grid.get('currentSnapshot');
@@ -485,17 +493,25 @@ function getDimensions(winSize) {
 
 function App() {
     const [grid, setGrid] = useState(initialGridFromURL);
-    const settings = grid.get('settings');
+    
+    // Determine what to render
+    const isHomePage = grid === null;
+    const isHomePageModal = !isHomePage && grid.get('initialDigits') === '0'.repeat(81) && grid.get('modalState');
+    const isPuzzleView = !isHomePage && !isHomePageModal;
+    
+    // Extract values from grid for puzzle view (or use defaults)
+    const settings = grid ? grid.get('settings') : modelHelpers.loadSettings();
     let showTimer = settings[SETTINGS.showTimer];
-    const intervalStartTime = grid.get('intervalStartTime');
-    const endTime = grid.get('endTime');
-    const pausedAt = grid.get('pausedAt');
-    const hintsUsedCount = grid.get('hintsUsed').size;
-    const solved = grid.get('solved');
-    const mode = grid.get('mode');
-    const inputMode = grid.get('tempInputMode') || grid.get('inputMode');
-    const completedDigits = grid.get('completedDigits');
-    const modalState = grid.get('modalState');
+    const intervalStartTime = grid ? grid.get('intervalStartTime') : undefined;
+    const endTime = grid ? grid.get('endTime') : undefined;
+    const pausedAt = grid ? grid.get('pausedAt') : undefined;
+    const hintsUsedCount = grid ? grid.get('hintsUsed').size : 0;
+    const solved = grid ? grid.get('solved') : false;
+    const mode = grid ? grid.get('mode') : 'enter';
+    const inputMode = grid ? (grid.get('tempInputMode') || grid.get('inputMode')) : 'digit';
+    const completedDigits = grid ? grid.get('completedDigits') : {};
+    const modalState = grid ? grid.get('modalState') : undefined;
+    
     if (modalState) {
         if (modalState.fetchRequired) {
             if (modalState.modalType === MODAL_TYPE_HINT) {
@@ -507,13 +523,32 @@ function App() {
         }
     }
     const modalActive = modalState !== undefined;
-
+    
+    // All hooks must be called before any conditional returns
     const mouseDownHandler = useCallback(e => cellMouseDownHandler(e, setGrid), []);
     const mouseOverHandler = useCallback(e => cellMouseOverHandler(e, setGrid), []);
     const inputHandler = useCallback(e => inputEventHandler(e, setGrid, inputMode), [inputMode]);
     const modalHandler = useCallback(a => dispatchModalAction(a, setGrid), []);
     const menuHandler = useCallback(a => dispatchMenuAction(a, setGrid), []);
     const pauseHandler = useCallback(() => pauseTimer(setGrid), []);
+    
+    // Handle browser back button
+    useEffect(() => {
+        const handlePopState = (e) => {
+            // When back button is pressed, check current URL and update state
+            const params = new URLSearchParams(window.location.search);
+            if (!params.get('s')) {
+                // No puzzle in URL, show home page
+                setGrid(null);
+            } else {
+                // Reload the grid from URL
+                window.location.reload();
+            }
+        };
+        
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
 
     useEffect(
         () => {
@@ -535,7 +570,7 @@ function App() {
             window.addEventListener('blur', blurHandler);
             return () => window.removeEventListener('blur', blurHandler);
         },
-        [setGrid] // This effect will essentially never be re-run
+        [setGrid]
     );
 
     useEffect(
@@ -544,12 +579,116 @@ function App() {
             document.addEventListener("visibilitychange", visibilityHandler);
             return () => window.removeEventListener('blur', visibilityHandler);
         },
-        [setGrid] // This effect will essentially never be re-run
+        [setGrid]
     );
 
-
     const winSize = useWindowSize(400);
-    const dimensions = useMemo(() => getDimensions(winSize), [winSize])
+    const dimensions = useMemo(() => getDimensions(winSize), [winSize]);
+    
+    // Now we can do conditional rendering after all hooks are called
+    if (isHomePage) {
+        const nytPuzzles = loadNYTPuzzles();
+        
+        // Load settings from localStorage
+        const savedSettings = localStorage.getItem('settings');
+        const homeSettings = savedSettings ? JSON.parse(savedSettings) : {};
+        
+        const handleNewPuzzle = () => {
+            // Push state to enable back button
+            window.history.pushState({ view: 'new-puzzle' }, '', '/?new');
+            // Create empty puzzle in enter mode
+            const emptyGrid = newSudokuModel({
+                initialDigits: '0'.repeat(81),
+                skipCheck: true,
+                onPuzzleStateChange: grid => {
+                    document.body.dataset.currentSnapshot = grid.get('currentSnapshot');
+                    modelHelpers.persistPuzzleState(grid);
+                }
+            });
+            setGrid(emptyGrid);
+        };
+        
+        const handleImportPuzzle = () => {
+            // Push state to enable back button
+            window.history.pushState({ view: 'import' }, '', '/?import');
+            // Create a minimal grid to show the paste modal
+            const tempGrid = newSudokuModel({
+                initialDigits: '0'.repeat(81),
+                skipCheck: true,
+                onPuzzleStateChange: () => {}
+            });
+            setGrid(modelHelpers.showPasteModal(tempGrid));
+        };
+        
+        const handleSettings = () => {
+            // Push state to enable back button
+            window.history.pushState({ view: 'settings' }, '', '/?settings');
+            // Create a minimal grid to show the settings modal
+            const tempGrid = newSudokuModel({
+                initialDigits: '0'.repeat(81),
+                skipCheck: true,
+                onPuzzleStateChange: () => {}
+            });
+            setGrid(modelHelpers.showSettingsModal(tempGrid));
+        };
+        
+        const handleAbout = () => {
+            // Push state to enable back button
+            window.history.pushState({ view: 'about' }, '', '/?about');
+            // Create a minimal grid to show the about modal
+            const tempGrid = newSudokuModel({
+                initialDigits: '0'.repeat(81),
+                skipCheck: true,
+                onPuzzleStateChange: () => {}
+            });
+            setGrid(modelHelpers.showAboutModal(tempGrid));
+        };
+        
+        return (
+            <div className="sudoku-app">
+                <SvgSprites />
+                <HomePage
+                    nytPuzzles={nytPuzzles}
+                    showRatings={homeSettings[SETTINGS.showRatings]}
+                    shortenLinks={homeSettings[SETTINGS.shortenLinks]}
+                    onNewPuzzle={handleNewPuzzle}
+                    onImportPuzzle={handleImportPuzzle}
+                    onSettings={handleSettings}
+                    onAbout={handleAbout}
+                />
+            </div>
+        );
+    }
+    
+    if (isHomePageModal) {
+        const homeModalHandler = (a) => {
+            if (a === 'cancel' || a === 'close' || a === 'cancel-paste') {
+                // Return to home page
+                setGrid(null);
+            } else if (a.action === 'save-settings') {
+                // Apply settings then return to home page
+                modelHelpers.applyModalAction(grid, a);
+                setGrid(null);
+            } else if (a.action === 'save-feature-flags') {
+                // Feature flags save will reload the page
+                setGrid((grid) => modelHelpers.applyModalAction(grid, a));
+            } else {
+                // For paste-initial-digits and other actions, let them handle navigation
+                setGrid((grid) => modelHelpers.applyModalAction(grid, a));
+            }
+        };
+        
+        return (
+            <div className="sudoku-app">
+                <SvgSprites />
+                <ModalContainer
+                    modalState={modalState}
+                    modalHandler={homeModalHandler}
+                    menuHandler={menuHandler}
+                />
+            </div>
+        );
+    }
 
     const classes = [`sudoku-app mode-${mode} ${dimensions.orientation}`];
     if (solved) {
