@@ -1,150 +1,90 @@
 .home-page {
-    min-height: 100vh;
+    @apply min-h-screen flex flex-col overflow-y-auto;
     background: var(--background-color);
     color: var(--text-color);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
 }
 
 .home-page-header {
-    text-align: center;
-    padding: 4rem 2rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    @apply text-center px-8 py-16 bg-gradient-to-br from-primary-500 via-purple-500 to-primary-600 text-white shadow-xl;
 }
 
 .home-page-header h1 {
-    margin: 0 0 0.5rem;
-    font-size: 3rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    @apply text-5xl md:text-6xl font-extrabold mb-4 tracking-tight;
+    margin: 0;
 }
 
 .home-page-header .tagline {
+    @apply text-xl md:text-2xl font-light opacity-95;
     margin: 0;
-    font-size: 1.25rem;
-    opacity: 0.95;
-    font-weight: 300;
 }
 
 .home-page-content {
-    flex: 1;
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 3rem 2rem;
+    @apply flex-1 max-w-7xl w-full mx-auto px-8 py-12;
 }
 
 .action-section {
-    margin-bottom: 4rem;
+    @apply mb-16;
 }
 
 .action-section h2 {
-    font-size: 2rem;
-    margin: 0 0 2rem;
-    font-weight: 600;
-    color: var(--text-color);
+    @apply text-3xl md:text-4xl font-bold mb-8 text-gray-900;
+    margin: 0;
 }
 
 .action-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8;
 }
 
 .action-card {
-    background: var(--modal-bg-color);
-    border: 2px solid transparent;
-    border-radius: 12px;
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.action-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border-color: #667eea;
+    @apply bg-white/80 backdrop-blur-sm border-2 border-transparent rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-2 hover:border-primary-400;
 }
 
 .action-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 1rem;
-    color: #667eea;
+    @apply w-16 h-16 mx-auto mb-4 text-primary-500;
 }
 
 .action-icon svg {
-    width: 100%;
-    height: 100%;
+    @apply w-full h-full;
 }
 
 .action-card h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-color);
+    @apply text-xl md:text-2xl font-bold mb-2 text-gray-900;
+    margin: 0;
 }
 
 .action-card p {
+    @apply text-sm md:text-base text-gray-600;
     margin: 0;
-    font-size: 0.95rem;
-    color: var(--status-bar-text-color);
 }
 
 .nyt-section {
-    margin-top: 3rem;
+    @apply mt-12;
 }
 
 .nyt-section h2 {
-    font-size: 2rem;
-    margin: 0 0 0.5rem;
-    font-weight: 600;
-    color: var(--text-color);
+    @apply text-3xl md:text-4xl font-bold mb-2 text-gray-900;
+    margin: 0;
 }
 
 .section-description {
-    margin: 0 0 2rem;
-    font-size: 1rem;
-    color: var(--status-bar-text-color);
+    @apply mb-8 text-base md:text-lg text-gray-600;
+    margin: 0;
 }
 
 .nyt-puzzles {
-    background: var(--modal-bg-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl;
 }
 
 .nyt-month-section {
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--modal-heading-underline-color);
-    padding-bottom: 1rem;
+    @apply mb-6 pb-4 border-b border-gray-200;
 }
 
 .nyt-month-section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
+    @apply border-b-0 mb-0;
 }
 
 .nyt-month-section h2 {
-    cursor: pointer;
-    font-size: 1.3rem;
-    margin: 0 0 1rem;
-    padding: 0.5rem;
-    border-radius: 6px;
-    transition: background-color 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.nyt-month-section h2:hover {
-    background-color: var(--menu-hover-bg-color);
+    @apply cursor-pointer text-xl md:text-2xl font-semibold m-0 p-3 rounded-lg transition-colors flex items-center gap-2 hover:bg-gray-100;
 }
 
 .nyt-month-section h2::before {

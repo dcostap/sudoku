@@ -13,7 +13,13 @@ export default function HintButton ({menuHandler}) {
     );
 
     return (
-        <button id="hint-button" type="button" title="Hint" onClick={clickHandler}>
+        <button 
+            id="hint-button" 
+            type="button" 
+            title="Hint" 
+            onClick={clickHandler}
+            className="w-11 h-11 flex items-center justify-center rounded-lg bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-primary-300 transition-all duration-200 hover:shadow-md active:scale-95"
+        >
             <ButtonIcon name="hint" />
         </button>
     )

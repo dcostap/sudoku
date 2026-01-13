@@ -1,6 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        @apply m-0 w-full h-full;
+    }
+
+    body {
+        @apply m-0 p-0 w-full h-full touch-none;
+        font-family: var(--app-font-family);
+        font-size: 1.2rem;
+    }
+
+    #root {
+        @apply box-border h-full w-full;
+        color: var(--text-color);
+        background-color: var(--background-color);
+    }
+
+    a {
+        @apply no-underline px-1;
+        color: var(--link-text-color);
+        background-color: var(--link-bg-color);
+    }
+
+    a:hover {
+        color: var(--link-hover-text-color);
+        background-color: var(--link-hover-bg-color);
+        border-bottom: 1px solid var(--link-hover-text-color);
+    }
+}
+
 :root {
-    --app-font-family: 'Helvetica Neue', Arial, sans-serif;
-    --background-color: #ffffff;
+    --app-font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    --background-color: #f8fafc;
     --text-color: #333333;
     --link-text-color: #0000ff;
     --link-bg-color: transparent;
@@ -202,78 +236,26 @@
     --spinner-color: #777777;
 }
 
-html {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-}
-
-body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    font-family: var(--app-font-family);
-    font-size: 1.2rem;
-    touch-action: none;
-}
-
-#root {
-    box-sizing: border-box;
-    padding-top: 7.5vh;
-    height: 100%;
-    width: 100%;
-    color: var(--text-color);
-    background-color: var(--background-color);
-}
-
-a {
-    color: var(--link-text-color);
-    background-color: var(--link-bg-color);
-    text-decoration: none;
-    padding: 0 0.1em;
-}
-
-a:hover {
-    color: var(--link-hover-text-color);
-    background-color: var(--link-hover-bg-color);
-    border-bottom: 1px solid var(--link-hover-text-color);
-}
-
 .sudoku-app {
-    width: 100%;
-    height: 100%;
-    user-select: none;
+    @apply w-full h-full select-none;
 }
 
 .ui-elements {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: space-evenly;
-    align-items: center;
+    @apply w-full h-full flex flex-row flex-nowrap justify-evenly items-center;
 }
 
 .portrait .ui-elements {
-    flex-flow: column nowrap;
+    @apply flex-col;
 }
 
 .buttons {
-    text-align: center;
+    @apply text-center;
 }
 
 .buttons a {
-    display: inline-block;
-    text-decoration: none;
-    font-size: 1.8rem;
-    font-weight: bold;
-    padding: 0.4em 0.8em;
-    margin: 0.3em;
+    @apply inline-block no-underline text-3xl font-bold py-2 px-4 my-2 mx-1 rounded-sm border-none;
     color: var(--button-text-color);
     background-color: var(--button-bg-color);
-    border-radius: 0.1em;
-    border: none;
 }
 
 button:hover,
@@ -282,6 +264,5 @@ a.btn:hover {
 }
 
 .portrait .buttons a {
-    font-size: 1rem;
-    margin: 0.2em;
+    @apply text-base my-1;
 }

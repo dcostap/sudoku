@@ -8,11 +8,6 @@ import './menu-button.css';
 function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
     const [hidden, setHidden] = useState(true);
 
-    const classes = ['menu'];
-    if (hidden) {
-        classes.push('hidden')
-    }
-
     const toggleHandler = useCallback(
         () => setHidden(h => !h),
         []
@@ -21,7 +16,7 @@ function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
     const clickHandler = useCallback(
         e => {
             const parent = e.target.parentElement;
-            if (parent.classList && parent.classList.contains('disabled-link')) {
+            if (parent.classList && parent.classList.contains('disabled')) {
                 e.preventDefault();
                 return;
             }
@@ -39,43 +34,99 @@ function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
 
     const overlay = hidden
         ? null
-        : <div className="overlay" onClick={() => setHidden(true)} />
+        : <div className="fixed inset-0 z-40" onClick={() => setHidden(true)} />
 
-    const shareLinkClass = initialDigits ? '' : 'disabled-link';
+    const shareLinkClass = initialDigits ? '' : 'disabled';
 
     return (
-        <div className={classes.join(' ')}>
+        <div className="relative">
             { overlay }
-            <button type="button" title="Menu" onClick={toggleHandler}>
+            <button 
+                type="button" 
+                title="Menu" 
+                onClick={toggleHandler}
+                className="w-11 h-11 flex items-center justify-center rounded-lg bg-white/50 hover:bg-white/80 backdrop-blur-sm border border-gray-200/50 hover:border-primary-300 transition-all duration-200 hover:shadow-md active:scale-95"
+            >
                 <ButtonIcon name="menu" />
             </button>
-            <ul onClick={clickHandler}>
-                <li className={shareLinkClass}>
-                    <a href="./" data-menu-action="show-share-modal"
-                    >Share this puzzle</a>
-                </li>
-                <li>
-                    <a href="./" data-menu-action="toggle-show-pencilmarks">{showHidePencilmarks} pencil marks</a>
-                </li>
-                <li>
-                    <a href="./" data-menu-action="clear-pencilmarks">Clear all pencil marks</a>
-                </li>
-                <li className={shareLinkClass}>
-                    <a href="./" data-menu-action="calculate-candidates">Auto calculate candidates</a>
-                </li>
-                <li>
-                    <a href="./" data-menu-action="save-screenshot">Save a screenshot</a>
-                </li>
-                <li className={shareLinkClass}>
-                    <a href="./" data-menu-action="show-solver-modal">Open in SudokuWiki.org solver</a>
-                </li>
-                <li><a href="./">New puzzle</a></li>
-                <li>
-                    <a href="./" data-menu-action="show-settings-modal">Settings</a>
-                </li>
-                <li><a href="./" data-menu-action="show-help-page">Help</a></li>
-                <li><a href="./" data-menu-action="show-about-modal">About this app</a></li>
-            </ul>
+            {!hidden && (
+                <ul 
+                    onClick={clickHandler}
+                    className="absolute right-0 top-14 w-56 max-w-[92vw] max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-lg border border-gray-200/50 rounded-xl shadow-2xl py-2 z-50 animate-slide-down"
+                >
+                    <li className={shareLinkClass}>
+                        <a 
+                            href="./" 
+                            data-menu-action="show-share-modal"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >Share this puzzle</a>
+                    </li>
+                    <li>
+                        <a 
+                            href="./" 
+                            data-menu-action="toggle-show-pencilmarks"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        >{showHidePencilmarks} pencil marks</a>
+                    </li>
+                    <li>
+                        <a 
+                            href="./" 
+                            data-menu-action="clear-pencilmarks"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        >Clear all pencil marks</a>
+                    </li>
+                    <li className={shareLinkClass}>
+                        <a 
+                            href="./" 
+                            data-menu-action="calculate-candidates"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >Auto calculate candidates</a>
+                    </li>
+                    <div className="my-2 border-t border-gray-200/50" />
+                    <li>
+                        <a 
+                            href="./" 
+                            data-menu-action="save-screenshot"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        >Save a screenshot</a>
+                    </li>
+                    <li className={shareLinkClass}>
+                        <a 
+                            href="./" 
+                            data-menu-action="show-solver-modal"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >Open in SudokuWiki.org solver</a>
+                    </li>
+                    <div className="my-2 border-t border-gray-200/50" />
+                    <li>
+                        <a 
+                            href="./"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        >New puzzle</a>
+                    </li>
+                    <li>
+                        <a 
+                            href="./" 
+                            data-menu-action="show-settings-modal"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        >Settings</a>
+                    </li>
+                    <li>
+                        <a 
+                            href="./" 
+                            data-menu-action="show-help-page"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        >Help</a>
+                    </li>
+                    <li>
+                        <a 
+                            href="./" 
+                            data-menu-action="show-about-modal"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        >About this app</a>
+                    </li>
+                </ul>
+            )}
         </div>
     )
 }

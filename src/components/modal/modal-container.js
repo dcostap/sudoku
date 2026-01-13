@@ -41,7 +41,7 @@ const stopPropagation = (e) => e.stopPropagation();
 
 function ModalBackdrop() {
     return (
-        <div className="modal-backdrop" />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 animate-fade-in" />
     );
 }
 
@@ -111,7 +111,7 @@ export default function ModalContainer({modalState, modalHandler, menuHandler}) 
     if (content) {
         return <>
             <ModalBackdrop />
-            <div className="modal-container" onClick={containerClickHandler} onMouseDown={stopPropagation}>
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4" onClick={containerClickHandler} onMouseDown={stopPropagation}>
                 {content}
             </div>
         </>;

@@ -8,44 +8,8 @@
     background-color: transparent;
 }
 
-.menu.hidden ul {
-    display: none;
-}
-
-.menu ul {
-    position: absolute;
-    right: 10px;
-    top: 1.8em;
-    width: 11em;
-    max-width: 92vw;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 2px;
-    margin: 0;
-    border: 1px solid var(--menu-border-color);
-    background-color: var(--menu-bg-color);
-    box-shadow: var(--menu-box-shadow);
-}
-
-.menu li {
-    list-style: none;
-    padding: 0;
-    font-size: 1.2rem;
-}
-
-.menu a,
-.menu a:visited {
-    display: block;
-    padding: 0.4em 0.6em;
-    text-decoration: none;
-    color: var(--menu-text-color);
-}
-
-.menu a:hover,
-.menu a:focus {
-    color: var(--menu-hover-text-color);
-    background-color: var(--menu-hover-bg-color);
-    border: none;
+li.disabled a {
+    @apply opacity-50 cursor-not-allowed pointer-events-none;
 }
 
 .menu .disabled-link a {
