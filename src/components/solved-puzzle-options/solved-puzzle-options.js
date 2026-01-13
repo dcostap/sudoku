@@ -27,7 +27,7 @@ export default function SolvedPuzzleOptions({elapsedTime, hintsUsedCount, menuHa
         <div className="solved-puzzle-options" onClick={clickHandler}>
             <p>Puzzle solved in {secondsAsHMS(elapsedTime)}{hintCount}</p>
             <button data-menu-action="show-share-modal">Share this puzzle</button>
-            <button data-menu-action="restart-puzzle">Restart this puzzle</button>
+            <button data-menu-action="restart-puzzle">Solve this puzzle again</button>
             <a href="./" className="btn">New puzzle</a>
         </div>
     )

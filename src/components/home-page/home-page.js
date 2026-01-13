@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { compressPuzzleDigits } from '../../lib/string-utils';
+import { modelHelpers } from '../../lib/sudoku-model';
 import SudokuMiniGrid from '../sudoku-grid/sudoku-mini-grid';
 import './home-page.css';
 
@@ -108,6 +109,175 @@ function NYTPuzzleList({ nytPuzzles, showRatings, shortenLinks }) {
 }
 
 function HomePage({ nytPuzzles, showRatings, shortenLinks, onNewPuzzle, onImportPuzzle, onSettings, onAbout }) {
+    const [activeTab, setActiveTab] = useState('nyt'); // 'nyt', 'in-progress', 'history'
+    const [inProgressPuzzles, setInProgressPuzzles] = useState([]);
+    const [historyPuzzles, setHistoryPuzzles] = useState([]);
+
+    const loadPuzzles = useCallback(() => {
+        // Load in-progress puzzles - need to create a proper grid with settings
+        const settings = modelHelpers.loadSettings();
+        const tempGrid = { 
+            get: (key) => {
+                if (key === 'settings') return settings;
+                return undefined;
+            }
+        };
+        const savedPuzzles = modelHelpers.getSavedPuzzles(tempGrid) || [];
+        setInProgressPuzzles(savedPuzzles);
+        
+        // Load history
+        const history = modelHelpers.getAllPuzzleHistory();
+        setHistoryPuzzles(history);
+        
+        console.log('Loaded:', savedPuzzles.length, 'in progress,', history.length, 'history items');
+    }, []);
+
+    // Load puzzles and check for auto-abandon on mount
+    useEffect(() => {
+        // Check for puzzles to auto-abandon
+        modelHelpers.checkAutoAbandon();
+        loadPuzzles();
+    }, [loadPuzzles]);
+
+    // Reload when tab becomes active
+    useEffect(() => {
+        const handleFocus = () => {
+            console.log('Window focused, reloading puzzles');
+            loadPuzzles();
+        };
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
+    }, [loadPuzzles]);
+
+    const formatElapsedTime = (elapsedTime) => {
+        const seconds = Math.floor(elapsedTime / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        
+        if (hours > 0) {
+            return `${hours}h ${minutes % 60}m`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${seconds % 60}s`;
+        } else {
+            return `${seconds}s`;
+        }
+    };
+
+    const renderInProgressPuzzles = () => {
+        if (inProgressPuzzles.length === 0) {
+            return (
+                <div className="puzzles-empty">
+                    No puzzles in progress. Start a new puzzle to begin!
+                </div>
+            );
+        }
+
+        return (
+            <div className="saved-puzzles-list">
+                {inProgressPuzzles.map((puzzle, idx) => {
+                    const puzzleString = shortenLinks
+                        ? compressPuzzleDigits(puzzle.initialDigits)
+                        : puzzle.initialDigits;
+                    
+                    const dateStr = new Date(puzzle.lastUpdatedTime).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    return (
+                        <div key={idx} className="saved-puzzle-item">
+                            <a href={`./?s=${puzzleString}&d=${puzzle.difficultyLevel || ''}&r=1`}>
+                                <SudokuMiniGrid 
+                                    puzzle={{ 
+                                        digits: puzzle.completedDigits || puzzle.initialDigits,
+                                        difficulty: puzzle.difficultyRating
+                                    }} 
+                                    showRatings={showRatings} 
+                                />
+                                <div className="saved-puzzle-info">
+                                    <div className="saved-puzzle-time">
+                                        <strong>Time:</strong> {formatElapsedTime(puzzle.elapsedTime)}
+                                    </div>
+                                    <div className="saved-puzzle-date">
+                                        Last played: {dateStr}
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    const renderHistoryPuzzles = () => {
+        if (historyPuzzles.length === 0) {
+            return (
+                <div className="puzzles-empty">
+                    No puzzle history yet. Complete or abandon puzzles to see them here!
+                </div>
+            );
+        }
+
+        return (
+            <div className="history-puzzles-list">
+                {historyPuzzles.map((entry, idx) => {
+                    const puzzleString = shortenLinks
+                        ? compressPuzzleDigits(entry.initialDigits)
+                        : entry.initialDigits;
+                    
+                    const dateStr = new Date(entry.archivedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    const statusBadge = entry.status === 'solved' 
+                        ? <span className="status-badge solved">✓ Solved</span>
+                        : <span className="status-badge abandoned">Abandoned</span>;
+
+                    // Create URLs for replay and solve again
+                    const replayUrl = `./?s=${puzzleString}&d=${entry.difficultyLevel || ''}&replay=1&attempt=${entry.attemptIndex}`;
+                    const solveAgainUrl = `./?s=${puzzleString}&d=${entry.difficultyLevel || ''}`;
+
+                    return (
+                        <div key={idx} className="history-puzzle-item">
+                            <SudokuMiniGrid 
+                                puzzle={{ 
+                                    digits: entry.initialDigits,
+                                    difficulty: entry.difficultyRating
+                                }} 
+                                showRatings={showRatings} 
+                            />
+                            <div className="history-puzzle-info">
+                                {statusBadge}
+                                <div className="history-puzzle-time">
+                                    <strong>Time:</strong> {formatElapsedTime(entry.elapsedTime)}
+                                </div>
+                                <div className="history-puzzle-date">
+                                    {dateStr}
+                                </div>
+                                <div className="history-puzzle-actions">
+                                    <a href={replayUrl} className="btn-small btn-secondary">
+                                        ▶ Replay
+                                    </a>
+                                    <a href={solveAgainUrl} className="btn-small btn-primary">
+                                        ↻ Solve Again
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
     return (
         <div className="home-page">
             <div className="home-page-header">
@@ -158,14 +328,52 @@ function HomePage({ nytPuzzles, showRatings, shortenLinks, onNewPuzzle, onImport
                     </div>
                 </section>
 
-                <section className="nyt-section">
-                    <h2>NYT Puzzles</h2>
-                    <p className="section-description">Select from a collection of New York Times Sudoku puzzles</p>
-                    <NYTPuzzleList 
-                        nytPuzzles={nytPuzzles}
-                        showRatings={showRatings}
-                        shortenLinks={shortenLinks}
-                    />
+                <section className="puzzles-section">
+                    <div className="tabs-container">
+                        <button 
+                            className={`tab ${activeTab === 'nyt' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('nyt')}
+                        >
+                            NYT Puzzles
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'in-progress' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('in-progress')}
+                        >
+                            In Progress {inProgressPuzzles.length > 0 && <span className="badge">{inProgressPuzzles.length}</span>}
+                        </button>
+                        <button 
+                            className={`tab ${activeTab === 'history' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('history')}
+                        >
+                            History {historyPuzzles.length > 0 && <span className="badge">{historyPuzzles.length}</span>}
+                        </button>
+                    </div>
+
+                    {activeTab === 'nyt' && (
+                        <div className="tab-content">
+                            <p className="section-description">Select from a collection of New York Times Sudoku puzzles</p>
+                            <NYTPuzzleList 
+                                nytPuzzles={nytPuzzles}
+                                showRatings={showRatings}
+                                shortenLinks={shortenLinks}
+                            />
+                        </div>
+                    )}
+
+                    {activeTab === 'in-progress' && (
+                        <div className="tab-content">
+                            <p className="section-description">Continue solving your active puzzles</p>
+                            {renderInProgressPuzzles()}
+                        </div>
+                    )}
+
+                    {activeTab === 'history' && (
+                        <div className="tab-content">
+                            <p className="section-description">Review your completed and abandoned puzzles</p>
+                            {renderHistoryPuzzles()}
+                        </div>
+                    )}
                 </section>
             </div>
 

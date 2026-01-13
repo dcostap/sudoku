@@ -66,6 +66,103 @@
     margin: 0;
 }
 
+.puzzles-section {
+    @apply mt-12;
+}
+
+.tabs-container {
+    @apply flex gap-2 mb-6 bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg;
+}
+
+.tab {
+    @apply flex-1 px-6 py-3 text-base md:text-lg font-semibold rounded-lg transition-all duration-200 cursor-pointer border-2 border-transparent;
+    background: transparent;
+    color: var(--text-color);
+}
+
+.tab:hover {
+    @apply bg-gray-100;
+}
+
+.tab.active {
+    @apply bg-primary-500 text-white shadow-md border-primary-600;
+}
+
+.tab .badge {
+    @apply ml-2 px-2 py-1 text-xs rounded-full;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tab.active .badge {
+    @apply bg-white/40;
+}
+
+.tab-content {
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl;
+}
+
+.puzzles-empty {
+    @apply text-center py-12 text-gray-500 text-base md:text-lg;
+}
+
+.saved-puzzles-list,
+.history-puzzles-list {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.saved-puzzle-item,
+.history-puzzle-item {
+    @apply bg-white border-2 border-gray-200 rounded-xl p-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary-400;
+}
+
+.saved-puzzle-item a,
+.history-puzzle-item > a {
+    @apply flex flex-col gap-3 no-underline text-inherit;
+}
+
+.saved-puzzle-info,
+.history-puzzle-info {
+    @apply text-sm text-gray-600;
+}
+
+.history-puzzle-actions {
+    @apply flex gap-2 mt-3;
+}
+
+.btn-small {
+    @apply px-3 py-1.5 text-xs font-semibold rounded-lg no-underline text-center transition-all duration-200 hover:shadow-md active:scale-95;
+}
+
+.btn-small.btn-primary {
+    @apply bg-primary-500 text-white hover:bg-primary-600;
+}
+
+.btn-small.btn-secondary {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+}
+
+.saved-puzzle-time,
+.history-puzzle-time {
+    @apply mb-1;
+}
+
+.saved-puzzle-date,
+.history-puzzle-date {
+    @apply text-xs text-gray-500;
+}
+
+.status-badge {
+    @apply inline-block px-3 py-1 text-xs font-semibold rounded-full mb-2;
+}
+
+.status-badge.solved {
+    @apply bg-green-100 text-green-800;
+}
+
+.status-badge.abandoned {
+    @apply bg-gray-100 text-gray-800;
+}
+
 .section-description {
     @apply mb-8 text-base md:text-lg text-gray-600;
     margin: 0;

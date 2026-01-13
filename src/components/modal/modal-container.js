@@ -9,6 +9,7 @@ import {
     MODAL_TYPE_PAUSED,
     MODAL_TYPE_CONFIRM_RESTART,
     MODAL_TYPE_CONFIRM_CLEAR_COLOR_HIGHLIGHTS,
+    MODAL_TYPE_CONFIRM_ABANDON,
     MODAL_TYPE_SOLVER,
     MODAL_TYPE_HELP,
     MODAL_TYPE_HINT,
@@ -24,6 +25,7 @@ import ModalInvalidInitialDigits from './modal-invalid-initial-digits';
 import ModalAbout from './modal-about';
 import ModalConfirmRestart from './modal-confirm-restart';
 import ModalConfirmClearColorHighlights from './modal-confirm-clear-color-highlights'
+import ModalConfirmAbandon from './modal-confirm-abandon';
 import ModalCheckResult from './modal-check-result';
 import ModalPaused from './modal-paused';
 import ModalPaste from './modal-paste';
@@ -83,6 +85,9 @@ export default function ModalContainer({modalState, modalHandler, menuHandler}) 
     }
     else if (modalState.modalType === MODAL_TYPE_CONFIRM_CLEAR_COLOR_HIGHLIGHTS) {
         content = <ModalConfirmClearColorHighlights modalHandler={modalHandler} />;
+    }
+    else if (modalState.modalType === MODAL_TYPE_CONFIRM_ABANDON) {
+        content = <ModalConfirmAbandon modalHandler={modalHandler} />;
     }
     else if (modalState.modalType === MODAL_TYPE_CHECK_RESULT) {
         content = <ModalCheckResult modalState={modalState} modalHandler={modalHandler} />;

@@ -61,6 +61,10 @@
     @apply mt-6 flex justify-end gap-3 pb-0;
 }
 
+.modal .button-group {
+    @apply mt-6 flex justify-end gap-3 pb-0;
+}
+
 .modal button {
     @apply px-6 py-2.5 text-sm font-semibold rounded-lg border-none transition-all duration-200 hover:shadow-lg active:scale-95;
     color: var(--modal-button-text-color);
@@ -70,6 +74,10 @@
 
 .modal button.primary {
     @apply bg-gradient-to-br from-primary-400 to-primary-500 text-white hover:from-primary-500 hover:to-primary-600;
+}
+
+.modal button.secondary {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
 }
 
 .modal button:disabled {

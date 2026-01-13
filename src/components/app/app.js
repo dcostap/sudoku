@@ -13,6 +13,7 @@ import VirtualKeyboard from '../virtual-keyboard/virtual-keyboard';
 import SolvedPuzzleOptions from '../solved-puzzle-options/solved-puzzle-options';
 import ModalContainer from '../modal/modal-container';
 import HomePage from '../home-page/home-page';
+import ReplayControls from '../replay-controls/replay-controls';
 
 import {
     MODAL_TYPE_RESUME_OR_RESTART,
@@ -37,6 +38,24 @@ function initialGridFromURL () {
     // If no puzzle is specified, return null to show the home page
     if (!initialDigits) {
         return null;
+    }
+
+    // Check if this is replay mode
+    const isReplay = params.get('replay') === '1';
+    
+    if (isReplay) {
+        const attemptIndex = parseInt(params.get('attempt') || '0', 10);
+        
+        // Load the history entry
+        const history = modelHelpers.getPuzzleHistory(initialDigits);
+        const historyEntry = history[attemptIndex];
+        
+        if (historyEntry) {
+            const grid = modelHelpers.createReplayGrid(historyEntry);
+            document.body.dataset.initialDigits = grid.get('initialDigits');
+            document.body.dataset.replayMode = 'true';
+            return grid;
+        }
     }
     
     let grid = newSudokuModel({
@@ -456,6 +475,9 @@ function dispatchMenuAction(action, setGrid) {
     else if (action === 'restart-puzzle') {
         setGrid((grid) => modelHelpers.confirmRestart(grid));
     }
+    else if (action === 'abandon-puzzle') {
+        setGrid((grid) => modelHelpers.showConfirmAbandonModal(grid));
+    }
     else {
         console.log(`Unrecognised menu action: '${action}'`);
     }
@@ -697,6 +719,8 @@ function App() {
     if (pausedAt) {
         classes.push('paused');
     }
+    
+    const isReplayMode = mode === 'replay';
 
     const startButton = mode === 'enter'
         ? (
@@ -713,10 +737,10 @@ function App() {
             menuHandler={menuHandler}
         />
     );
-
-    return (
-        <div className={classes.join(' ')} onMouseDown={mouseDownHandler}>
-            <SvgSprites />
+    
+    const statusBarOrReplayControls = isReplayMode
+        ? <ReplayControls grid={grid} setGrid={setGrid} modelHelpers={modelHelpers} />
+        : (
             <StatusBar
                 showTimer={showTimer}
                 startTime={grid.get('startTime')}
@@ -729,19 +753,27 @@ function App() {
                 pauseHandler={pauseHandler}
                 initialDigits={grid.get('initialDigits')}
             />
+        );
+
+    return (
+        <div className={classes.join(' ')} onMouseDown={mouseDownHandler}>
+            <SvgSprites />
+            {statusBarOrReplayControls}
             <div className="ui-elements">
                 <SudokuGrid
                     grid={grid}
                     gridId="main-grid"
                     dimensions={dimensions}
-                    isPaused={!!pausedAt}
-                    mouseDownHandler={mouseDownHandler}
-                    mouseOverHandler={mouseOverHandler}
-                    inputHandler={inputHandler}
+                    isPaused={!!pausedAt || isReplayMode}
+                    mouseDownHandler={isReplayMode ? null : mouseDownHandler}
+                    mouseOverHandler={isReplayMode ? null : mouseOverHandler}
+                    inputHandler={isReplayMode ? null : inputHandler}
                 />
                 <div>
                     {
-                        solved
+                        isReplayMode
+                            ? null
+                            : solved
                             ? (
                                 <SolvedPuzzleOptions
                                     elapsedTime={Math.floor((endTime - intervalStartTime) / 1000)}

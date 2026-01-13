@@ -17,6 +17,7 @@ import {
     MODAL_TYPE_PAUSED,
     MODAL_TYPE_CONFIRM_RESTART,
     MODAL_TYPE_CONFIRM_CLEAR_COLOR_HIGHLIGHTS,
+    MODAL_TYPE_CONFIRM_ABANDON,
     MODAL_TYPE_SOLVER,
     MODAL_TYPE_HINT,
     MODAL_TYPE_HELP,
@@ -57,6 +58,8 @@ const difficultyLevels = [
 ];
 
 const MAX_SAVED_PUZZLES = 5;
+const MAX_HISTORY_PER_PUZZLE = 5;
+const AUTO_ABANDON_DAYS = 14;
 
 const emptySet = Set();
 const charCodeOne = '1'.charCodeAt(0);
@@ -455,6 +458,295 @@ export const modelHelpers = {
             });
     },
 
+    archivePuzzleState: (grid, status) => {
+        // status: 'solved' or 'abandoned'
+        const initialDigits = grid.get('initialDigits');
+        const puzzleStateKey = grid.get('puzzleStateKey');
+        const historyKey = 'history-' + initialDigits;
+        
+        console.log('Archiving puzzle:', status, 'historyKey:', historyKey);
+        
+        // Get current history for this puzzle
+        let history = [];
+        try {
+            const historyJson = localStorage.getItem(historyKey);
+            if (historyJson) {
+                history = JSON.parse(historyJson);
+            }
+        } catch (e) {
+            console.error('Failed to load history:', e);
+        }
+        
+        // Create archive entry
+        const elapsedTime = (grid.get('endTime') || grid.get('pausedAt') || Date.now()) - grid.get('intervalStartTime');
+        const archiveEntry = {
+            initialDigits,
+            difficultyLevel: grid.get('difficultyLevel'),
+            startTime: grid.get('startTime'),
+            endTime: grid.get('endTime') || Date.now(),
+            elapsedTime: elapsedTime,
+            status: status, // 'solved' or 'abandoned'
+            undoList: grid.get('undoList').toArray(),
+            currentSnapshot: grid.get('currentSnapshot'),
+            hintsUsed: grid.get('hintsUsed').toArray(),
+            archivedAt: Date.now(),
+        };
+        
+        const difficultyRating = grid.get('difficultyRating');
+        if (difficultyRating) {
+            archiveEntry.difficultyRating = difficultyRating;
+        }
+        
+        // Add to history (most recent first) and limit to MAX_HISTORY_PER_PUZZLE
+        history.unshift(archiveEntry);
+        if (history.length > MAX_HISTORY_PER_PUZZLE) {
+            history = history.slice(0, MAX_HISTORY_PER_PUZZLE);
+        }
+        
+        console.log('Saving history with', history.length, 'entries');
+        
+        // Save history and remove active save
+        try {
+            localStorage.setItem(historyKey, JSON.stringify(history));
+            localStorage.removeItem(puzzleStateKey);
+            console.log('Successfully archived puzzle');
+        } catch (e) {
+            console.error('Failed to save history:', e);
+        }
+        
+        return grid;
+    },
+
+    getPuzzleHistory: (initialDigits) => {
+        const historyKey = 'history-' + initialDigits;
+        try {
+            const historyJson = localStorage.getItem(historyKey);
+            if (historyJson) {
+                return JSON.parse(historyJson);
+            }
+        } catch (e) {
+            console.error('Failed to load history for puzzle:', e);
+        }
+        return [];
+    },
+
+    getAllPuzzleHistory: () => {
+        const historyItems = [];
+        console.log('getAllPuzzleHistory: Scanning localStorage...');
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            console.log('Found key:', key);
+            if (key && key.substring(0, 8) === 'history-') {
+                try {
+                    const historyJson = localStorage.getItem(key);
+                    const history = JSON.parse(historyJson);
+                    console.log('Found history for', key, ':', history.length, 'attempts');
+                    // Add each history entry with its puzzle
+                    history.forEach((entry, attemptIndex) => {
+                        historyItems.push({
+                            ...entry,
+                            historyKey: key,
+                            attemptIndex: attemptIndex,
+                        });
+                    });
+                } catch (e) {
+                    console.error('Failed to parse history:', e);
+                }
+            }
+        }
+        // Sort by archived time (most recent first)
+        historyItems.sort((a, b) => b.archivedAt - a.archivedAt);
+        console.log('Total history items:', historyItems.length);
+        return historyItems;
+    },
+
+    // Debug helper - can be called from console
+    _debugAddTestHistory: () => {
+        const testPuzzle = '530070000600195000098000060800060003400803001700020006060000280000419005000080079';
+        const historyKey = 'history-' + testPuzzle;
+        const testEntry = {
+            initialDigits: testPuzzle,
+            difficultyLevel: '3',
+            startTime: Date.now() - 600000,
+            endTime: Date.now(),
+            elapsedTime: 600000,
+            status: 'solved',
+            undoList: [],
+            currentSnapshot: '',
+            hintsUsed: [],
+            archivedAt: Date.now(),
+        };
+        localStorage.setItem(historyKey, JSON.stringify([testEntry]));
+        console.log('Added test history entry');
+    },
+
+    createReplayGrid: (historyEntry) => {
+        const grid = Map({
+            mode: 'replay',
+            solved: historyEntry.status === 'solved',
+            settings: modelHelpers.loadSettings(),
+            featureFlags: modelHelpers.loadFeatureFlags(),
+            difficultyLevel: historyEntry.difficultyLevel,
+            difficultyRating: historyEntry.difficultyRating,
+            inputMode: 'digit',
+            tempInputMode: undefined,
+            startTime: historyEntry.startTime,
+            intervalStartTime: historyEntry.startTime,
+            endTime: historyEntry.endTime,
+            pausedAt: undefined,
+            undoList: List(historyEntry.undoList),
+            redoList: List(),
+            currentSnapshot: '',
+            replayHistory: List(historyEntry.undoList),
+            replayStep: 0,
+            cells: List(),
+            showPencilmarks: true,
+            hasErrors: false,
+            focusIndex: null,
+            completedDigits: {},
+            matchDigit: '0',
+            modalState: undefined,
+            hintsUsed: Set(historyEntry.hintsUsed || []),
+            initialDigits: historyEntry.initialDigits,
+        });
+        
+        // Set up cells with initial digits
+        const cells = Range(0, 81).toList().map(i => newCell(i, historyEntry.initialDigits[i]));
+        return grid.set('cells', cells).set('puzzleStateKey', 'replay-' + historyEntry.initialDigits);
+    },
+
+    replayStepForward: (grid) => {
+        const replayHistory = grid.get('replayHistory');
+        const currentStep = grid.get('replayStep');
+        
+        if (currentStep >= replayHistory.size) {
+            return grid; // At the end
+        }
+        
+        const snapshot = replayHistory.get(currentStep);
+        grid = grid.set('replayStep', currentStep + 1);
+        grid = modelHelpers.restoreSnapshot(grid, snapshot);
+        grid = modelHelpers.checkCompletedDigits(grid);
+        
+        return grid;
+    },
+
+    replayStepBackward: (grid) => {
+        const currentStep = grid.get('replayStep');
+        
+        if (currentStep <= 0) {
+            return grid; // At the beginning
+        }
+        
+        const replayHistory = grid.get('replayHistory');
+        grid = grid.set('replayStep', currentStep - 1);
+        
+        if (currentStep === 1) {
+            // Go back to initial state
+            const initialDigits = grid.get('initialDigits');
+            const cells = Range(0, 81).toList().map(i => newCell(i, initialDigits[i]));
+            grid = grid.set('cells', cells).set('currentSnapshot', '');
+        } else {
+            const snapshot = replayHistory.get(currentStep - 2);
+            grid = modelHelpers.restoreSnapshot(grid, snapshot);
+        }
+        
+        grid = modelHelpers.checkCompletedDigits(grid);
+        return grid;
+    },
+
+    replayGoToStep: (grid, step) => {
+        const replayHistory = grid.get('replayHistory');
+        const maxStep = replayHistory.size;
+        const targetStep = Math.max(0, Math.min(step, maxStep));
+        
+        grid = grid.set('replayStep', targetStep);
+        
+        if (targetStep === 0) {
+            // Go to initial state
+            const initialDigits = grid.get('initialDigits');
+            const cells = Range(0, 81).toList().map(i => newCell(i, initialDigits[i]));
+            grid = grid.set('cells', cells).set('currentSnapshot', '');
+        } else {
+            const snapshot = replayHistory.get(targetStep - 1);
+            grid = modelHelpers.restoreSnapshot(grid, snapshot);
+        }
+        
+        grid = modelHelpers.checkCompletedDigits(grid);
+        return grid;
+    },
+
+    checkAutoAbandon: () => {
+        const now = Date.now();
+        const cutoffTime = now - (AUTO_ABANDON_DAYS * 24 * 60 * 60 * 1000);
+        const keysToAbandon = [];
+        
+        // Find old saves
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.substring(0, 5) === 'save-') {
+                try {
+                    const puzzleStateJson = localStorage.getItem(key);
+                    const puzzleState = JSON.parse(puzzleStateJson);
+                    if (puzzleState.lastUpdatedTime && puzzleState.lastUpdatedTime < cutoffTime) {
+                        keysToAbandon.push({ key, puzzleState });
+                    }
+                } catch (e) {
+                    // Invalid save, remove it
+                    keysToAbandon.push({ key, puzzleState: null });
+                }
+            }
+        }
+        
+        // Archive old puzzles
+        keysToAbandon.forEach(({ key, puzzleState }) => {
+            if (puzzleState) {
+                const historyKey = 'history-' + puzzleState.initialDigits;
+                let history = [];
+                try {
+                    const historyJson = localStorage.getItem(historyKey);
+                    if (historyJson) {
+                        history = JSON.parse(historyJson);
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+                
+                // Create archive entry for abandoned puzzle
+                const archiveEntry = {
+                    initialDigits: puzzleState.initialDigits,
+                    difficultyLevel: puzzleState.difficultyLevel,
+                    startTime: puzzleState.startTime,
+                    endTime: puzzleState.lastUpdatedTime,
+                    elapsedTime: puzzleState.elapsedTime,
+                    status: 'abandoned',
+                    undoList: puzzleState.undoList || [],
+                    currentSnapshot: puzzleState.currentSnapshot || '',
+                    hintsUsed: puzzleState.hintsUsed || [],
+                    archivedAt: Date.now(),
+                };
+                
+                if (puzzleState.difficultyRating) {
+                    archiveEntry.difficultyRating = puzzleState.difficultyRating;
+                }
+                
+                history.unshift(archiveEntry);
+                if (history.length > MAX_HISTORY_PER_PUZZLE) {
+                    history = history.slice(0, MAX_HISTORY_PER_PUZZLE);
+                }
+                
+                try {
+                    localStorage.setItem(historyKey, JSON.stringify(history));
+                } catch (e) {
+                    console.error('Failed to archive abandoned puzzle:', e);
+                }
+            }
+            localStorage.removeItem(key);
+        });
+        
+        return keysToAbandon.length;
+    },
+
     parsePuzzleState: (puzzleStateKey) => {
         try {
             const puzzleStateJSON = localStorage.getItem(puzzleStateKey);
@@ -817,6 +1109,13 @@ export const modelHelpers = {
         return grid;
     },
 
+    showConfirmAbandonModal: (grid) => {
+        return grid.set('modalState', {
+            modalType: MODAL_TYPE_CONFIRM_ABANDON,
+            escapeAction: 'close',
+        });
+    },
+
     showSavedPuzzlesModal: (grid, oldModalState) => {
         if (!oldModalState) {
             oldModalState = {
@@ -1006,6 +1305,12 @@ export const modelHelpers = {
         }
         else if (action === 'clear-color-highlights-confirmed') {
             return modelHelpers.applyClearColorHighlights(grid);
+        }
+        else if (action === 'show-confirm-abandon') {
+            return modelHelpers.showConfirmAbandonModal(grid);
+        }
+        else if (action === 'abandon-confirmed') {
+            return modelHelpers.abandonPuzzle(grid);
         }
         else if (action === 'resume-timer') {
             return modelHelpers.resumeTimer(grid);
@@ -1591,6 +1896,16 @@ export const modelHelpers = {
             .set('solved', true)
             .set('endTime', Date.now());
         modelHelpers.notifyPuzzleStateChange(grid);
+        // Archive the solved puzzle to history
+        grid = modelHelpers.archivePuzzleState(grid, 'solved');
+        return grid;
+    },
+
+    abandonPuzzle: (grid) => {
+        // Archive the current puzzle as abandoned
+        grid = modelHelpers.archivePuzzleState(grid, 'abandoned');
+        // Redirect to home page
+        modelHelpers.redirectToHome();
         return grid;
     },
 

@@ -98,6 +98,21 @@ function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
                         >Open in SudokuWiki.org solver</a>
                     </li>
                     <div className="my-2 border-t border-gray-200/50" />
+                    <li className={shareLinkClass}>
+                        <a 
+                            href="./" 
+                            data-menu-action="restart-puzzle"
+                            className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >Restart puzzle</a>
+                    </li>
+                    <li className={shareLinkClass}>
+                        <a 
+                            href="./" 
+                            data-menu-action="abandon-puzzle"
+                            className="block px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >Abandon puzzle</a>
+                    </li>
+                    <div className="my-2 border-t border-gray-200/50" />
                     <li>
                         <a 
                             href="./"
