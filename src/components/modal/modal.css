@@ -1,501 +1,147 @@
 .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background-color: var(--modal-backdrop-color);
+    @apply fixed inset-0 bg-black/50 backdrop-blur-md z-[60] animate-fade-in;
 }
 
 .modal-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    @apply fixed inset-0 flex items-center justify-center z-[70] p-4;
 }
 
 .modal {
-    @apply relative max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 animate-scale-in;
+    @apply relative max-w-lg w-full max-h-[90vh] overflow-y-auto p-8 bg-white rounded-3xl shadow-2xl animate-scale-in;
     box-sizing: border-box;
-    color: var(--modal-text-color);
-    line-height: 130%;
+    color: #1e293b;
 }
 
 .modal h1 {
-    @apply text-2xl font-bold text-gray-900 mt-0 mb-4 pb-3 border-b-2 border-gray-200;
-    line-height: 1.3;
+    @apply text-xl font-black text-gray-900 mt-0 mb-6 uppercase tracking-tight;
+    line-height: 1.2;
 }
 
-.modal.check-result .icon-message {
-    display: flex;
-    align-items: flex-start;
-    margin: 0.3em;
+.modal p {
+    @apply text-sm text-gray-500 mb-6;
 }
 
-.modal.check-result .icon svg {
-    margin-right: 1em;
-    width: 2.4em;
-}
-
-.icon.check-result-ok use {
-    fill: var(--modal-icon-ok-fill-color);
-}
-
-.icon.check-result-warning use {
-    fill: var(--modal-icon-warning-fill-color);
-}
-
-.icon.check-result-error use {
-    fill: var(--modal-icon-error-fill-color);
-}
-
-.modal.check-result .message {
-    align-self: center;
-}
-
-.modal .buttons {
-    @apply mt-6 flex justify-end gap-3 pb-0;
-}
-
+.modal .buttons,
 .modal .button-group {
-    @apply mt-6 flex justify-end gap-3 pb-0;
+    @apply mt-8 flex justify-end gap-3;
 }
 
-.modal button {
-    @apply px-6 py-2.5 text-sm font-semibold rounded-lg border-none transition-all duration-200 hover:shadow-lg active:scale-95;
-    color: var(--modal-button-text-color);
-    background-color: var(--modal-button-bg-color);
-    min-width: 5em;
+.modal .primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 shadow-lg shadow-primary-500/20;
 }
 
-.modal button.primary {
-    @apply bg-gradient-to-br from-primary-400 to-primary-500 text-white hover:from-primary-500 hover:to-primary-600;
+.modal .secondary,
+.modal .cancel {
+    @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
 }
 
-.modal button.secondary {
-    @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+.modal .danger {
+    @apply bg-red-100 text-red-600 hover:bg-red-200;
+}
+
+.modal .primary,
+.modal .secondary,
+.modal .cancel,
+.modal .danger {
+    @apply px-5 py-2.5 text-sm font-bold rounded-xl border-none transition-all duration-200 active:scale-95 inline-block text-center no-underline;
+    min-width: 6rem;
 }
 
 .modal button:disabled {
-    @apply opacity-50 cursor-not-allowed;
-}
-
-.modal button:disabled:hover {
-    @apply shadow-none scale-100;
-}
-
-.modal button.danger {
-    @apply bg-gradient-to-br from-red-400 to-red-500 text-white hover:from-red-500 hover:to-red-600;
-}
-
-.modal button.primary,
-.modal a.btn.primary {
-    color: var(--modal-button-primary-text-color);
-    background-color: var(--modal-button-primary-bg-color);
-}
-
-.modal .buttons a.btn,
-.modal .buttons button,
-.modal.saved-puzzles a.btn,
-.modal.saved-puzzles button {
-    display: inline-block;
-    box-sizing: border-box;
-    text-align: center;
-    /* override browser button font */
-    font-family: var(--app-font-family);
-    font-size: 1.3rem;
-    font-weight: bold;
-    line-height: 1.3;
-    margin: 0.3em 0.5em;
-    border: none;
-    border-radius: 0.15em;
-    padding: 0.4em 0.8em;
-}
-
-.portrait .modal .buttons a.btn,
-.portrait .modal .buttons button {
-    margin: 0 0 0.5em 0.5em;
-    min-width: 4em;
-    padding: 0.4em 0.6em;
-}
-
-.modal.welcome {
-    max-width: 30em;
-}
-
-.count-badge {
-    display: inline-grid;
-    place-items: center;
-    margin-left: 0.1em;
-    color: var(--badge-text-color);
-    background-color: var(--badge-bg-color);
-    font-size: 0.8rem;
-    min-width: 1.2em;
-    height: 1.2em;
-    border-radius: 50%;
-}
-
-.modal.welcome .loading-failed {
-    color: var(--error-text-color);
-    font-style: italic;
-    opacity: 0.8;
-    margin: 1.5em 1.5em 2em;
-}
-
-.modal.welcome .spinner {
-    margin: 4.3em auto;
-}
-
-.recently-shared .section {
-    margin: 0.5em 0;
-}
-
-.recently-shared h2 {
-    font-size: 1.5rem;
-    margin: 0.9em 0 0 0;
-}
-
-.recently-shared h2::before {
-    content: '\25BE';
-    display: inline-block;
-    padding-right: 0.3em;
-    vertical-align: top;
-    line-height: 0.9;
-}
-
-.recently-shared .collapsed h2::before {
-    content: '\25B8';
-    line-height: 0.8;
-}
-
-.recently-shared ul {
-    max-height: 700px;
-    overflow: hidden;
-    margin: 0.2em 0 0 0;
-    padding: 0 0 0 0.7em;
-    opacity: 1;
-    transition: all 600ms;
-}
-
-.recently-shared .collapsed ul {
-    margin-top: 0;
-    max-height: 0;
-    opacity: 0;
-}
-
-.recently-shared li,
-.recently-shared li a,
-.recently-shared li svg,
-.recently-shared li div {
-    display: inline-block;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-}
-
-.recently-shared svg {
-    border-radius: 4px;
-}
-
-.recently-shared a,
-.saved-puzzle a.puzzle-selector {
-    border: 2px solid transparent;
-    border-radius: 4px;
-    text-decoration: none;
-    line-height: 0;
-}
-
-.recently-shared a:hover,
-.saved-puzzle a.puzzle-selector:hover {
-    border: 2px solid var(--link-hover-text-color);
-    background-color: transparent;
-}
-
-/* NYT Puzzle List Styles */
-.nyt-puzzles {
-    margin-top: 0.5em;
-}
-
-.nyt-puzzles-empty {
-    color: var(--error-text-color);
-    font-style: italic;
-    opacity: 0.8;
-    margin: 1.5em 1.5em 2em;
-}
-
-.nyt-month-section {
-    margin: 0.5em 0;
-}
-
-.nyt-month-section h2 {
-    font-size: 1.5rem;
-    margin: 0.9em 0 0 0;
-    cursor: pointer;
-}
-
-.nyt-month-section h2::before {
-    content: '\25BE';
-    display: inline-block;
-    padding-right: 0.3em;
-    vertical-align: top;
-    line-height: 0.9;
-}
-
-.nyt-month-section.collapsed h2::before {
-    content: '\25B8';
-    line-height: 0.8;
-}
-
-.nyt-month-section .puzzle-count {
-    font-size: 0.8em;
-    opacity: 0.7;
-    font-weight: normal;
-}
-
-.nyt-month-section ul {
-    max-height: 700px;
-    overflow: hidden;
-    margin: 0.2em 0 0 0;
-    padding: 0 0 0 0.7em;
-    opacity: 1;
-    transition: all 600ms;
-}
-
-.nyt-month-section.collapsed ul {
-    margin-top: 0;
-    max-height: 0;
-    opacity: 0;
-}
-
-.nyt-month-section li,
-.nyt-month-section li a,
-.nyt-month-section li svg,
-.nyt-month-section li div {
-    display: inline-block;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-}
-
-.nyt-puzzle-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4em;
-}
-
-.nyt-puzzle-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2em;
-    font-size: 0.85rem;
-}
-
-.nyt-puzzle-date {
-    font-weight: 500;
-}
-
-.difficulty-badge {
-    display: inline-block;
-    padding: 0.15em 0.5em;
-    border-radius: 0.25em;
-    font-size: 0.75rem;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.difficulty-badge.easy {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.difficulty-badge.medium {
-    background-color: #FF9800;
-    color: white;
-}
-
-.difficulty-badge.hard {
-    background-color: #F44336;
-    color: white;
-}
-
-.difficulty-badge.expert {
-    background-color: #9C27B0;
-    color: white;
-}
-
-.nyt-month-section svg {
-    border-radius: 4px;
-}
-
-.nyt-month-section a {
-    border: 2px solid transparent;
-    border-radius: 4px;
-    text-decoration: none;
-    line-height: 0;
-}
-
-.nyt-month-section a:hover {
-    border: 2px solid var(--link-hover-text-color);
-    background-color: transparent;
-}
-
-
-#welcome-footer {
-    margin-top: 2em;
-    border-top: 1px solid var(--modal-text-color);
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
-
-#welcome-footer p {
-    margin: 0.3em 0 0 0;
-    padding-bottom: 1.5em;
-}
-
-.modal.welcome .primary-buttons {
-    text-align: center;
-    margin-right: 2em;
-}
-
-.modal.welcome .primary-buttons>span {
-    display: inline-flex;
-    flex-direction: column;
-    margin: 0 auto;
-}
-
-.modal.welcome .primary-buttons button {
-    margin-top: 0.5em;
-}
-
-.modal.resume-restart {
-    width: 26em;
-    max-width: 95vw;
-}
-
-.modal.saved-puzzles {
-    width: 32em;
-    max-width: 95vw;
-}
-
-.modal.resume-restart .saved-puzzle,
-.modal.saved-puzzles .saved-puzzle {
-    display: flex;
-    align-items: center;
-}
-
-.modal.saved-puzzles .puzzle-selector {
-    display: block;
-    margin: 0.4em 0.4em 0 0;
-}
-
-.modal .saved-puzzle .sudoku-grid.mini {
-    margin-right: 0.4em;
-}
-
-.modal .puzzle-metadata {
-    flex: 0 0 18em;
-    font-size: 80%;
-    line-height: 1.2;
-    height: 1em;
-}
-
-.modal .puzzle-metadata th,
-.modal .puzzle-metadata td {
-    text-align: left;
-    vertical-align: top;
-    padding: 0.1em 0.4em 0.1em 0;
-}
-
-.modal.saved-puzzles .puzzle-buttons {
-    flex: 0 0 min-content;
-}
-
-.modal.saved-puzzles a.btn,
-.modal.saved-puzzles button {
-    min-width: 5.5em;
+    @apply opacity-40 cursor-not-allowed shadow-none active:scale-100;
 }
 
 .modal.paste textarea,
 .modal.invalid-initial-digits textarea {
-    width: 100%;
-    height: 7.5em;
-    padding: 0.6em;
-    box-sizing: border-box;
-    white-space: pre-wrap;
-    word-break: break-all;
-    resize: none;
+    @apply w-full h-32 p-4 text-sm font-mono bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-primary-500 focus:bg-white transition-all outline-none resize-none mb-4;
 }
 
 .settings-list {
-    list-style: none;
-    margin-left: 0;
-    padding-left: 0;
-}
-
-.settings-list li {
-    margin: 0.6em 0;
+    @apply space-y-4 list-none p-0 m-0;
 }
 
 .settings-list li label {
-    display: block;
-    position: relative;
-    padding-right: 3.5em;
+    @apply flex items-center justify-between gap-4 cursor-pointer py-1;
+}
+
+.settings-list li .text {
+    @apply text-sm font-bold text-gray-700;
 }
 
 input.toggle {
-    display: none;
+    @apply hidden;
 }
 
-input.toggle+.indicator {
-    display: inline-block;
-    position: absolute;
-    right: 0;
-    top: 0;
-    vertical-align: top;
-    height: 16px;
-    width: 32px;
-    background-color: var(--input-toggle-bg-color);
-    border: 1px inset var(--input-toggle-inset-color);
-    margin: 0 0 0 1.8em;
-    padding: 2px;
-    border-radius: 11px;
+input.toggle + .indicator {
+    @apply relative w-12 h-6 bg-gray-200 rounded-full transition-colors duration-300 border-2 border-transparent;
 }
 
-input.toggle+.indicator::before {
-    display: inline-block;
-    position: absolute;
-    content: '';
-    width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    background-color: var(--input-toggle-off-color);
-    margin: 0;
-    padding: 0;
-    left: 3px;
-    top: 2px;
-    transition: all 250ms;
+input.toggle:checked + .indicator {
+    @apply bg-primary-500;
 }
 
-input.toggle:checked+.indicator::before {
-    left: 17px;
-    background-color: var(--input-toggle-on-color);
+input.toggle + .indicator::before {
+    @apply content-[''] absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300;
 }
 
-.modal-container .modal.features {
-    max-width: min(26em, 94vw);
+input.toggle:checked + .indicator::before {
+    @apply translate-x-6;
 }
 
+/* Specific modal sizes */
+.modal.welcome, .modal.resume-restart { max-width: 28rem; }
+.modal.saved-puzzles { max-width: 32rem; }
+.modal.about, .modal.share { max-width: 24rem; }
+
+/* Saved puzzles improvements */
+.saved-puzzle {
+    @apply flex items-center gap-6 p-4 border border-gray-100 rounded-2xl mb-4 last:mb-0 hover:border-gray-200 transition-colors;
+}
+
+.puzzle-metadata {
+    @apply flex-1 text-xs text-gray-500 space-y-1;
+}
+
+.puzzle-metadata th {
+    @apply font-bold text-gray-700 pr-2 text-left;
+}
+
+.puzzle-buttons {
+    @apply flex flex-col gap-2;
+}
+
+.puzzle-buttons .btn, .puzzle-buttons button {
+    @apply py-1.5 px-3 min-w-[5rem] text-xs;
+}
+
+/* Feature list */
 .feature-list {
-    margin: 0 1em 0 0.6em;
+    @apply w-full text-sm border-collapse;
 }
 
 .feature-list th {
-    text-align: left;
-    border-bottom: 1px solid var(--modal-heading-underline-color);
+    @apply text-left border-b-2 border-gray-100 py-2 font-bold text-gray-400 uppercase text-[10px] tracking-widest;
+}
+
+.feature-list td {
+    @apply py-3 border-b border-gray-50;
+}
+
+/* Status badges */
+.status-badge {
+    @apply inline-flex items-center px-1.5 py-0.5 text-[10px] font-black uppercase rounded bg-gray-100 text-gray-500;
+}
+
+.status-badge.solved { @apply bg-green-100 text-green-700; }
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .modal { @apply p-6 rounded-2xl; }
+    .saved-puzzle { @apply flex-col items-stretch text-center; }
+    .saved-puzzle .sudoku-grid.mini { @apply mx-auto mb-2; }
+    .puzzle-metadata { @apply text-center; }
+    .puzzle-metadata th { @apply text-center pr-0; }
+    .puzzle-buttons { @apply flex-row justify-center mt-4; }
 }
 
 .feature-list td {

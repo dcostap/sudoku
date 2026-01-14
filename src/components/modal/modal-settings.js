@@ -8,7 +8,7 @@ function CheckBoxSetting ({name, text, allSettings, setSetting}) {
     return (
         <li>
             <label>
-                {text}
+                <span className="text">{text}</span>
                 <input
                     className="toggle"
                     type="checkbox"
@@ -113,7 +113,7 @@ export default function ModalSettings({modalHandler, modalState}) {
                 />
             </ul>
             <div className="buttons">
-                <button className="cancel" onClick={cancelHandler}>Cancel</button>
+                <button className="secondary" onClick={cancelHandler}>Cancel</button>
                 <button className="primary" onClick={saveHandler}>Save</button>
             </div>
         </div>

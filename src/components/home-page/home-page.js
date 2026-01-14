@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { compressPuzzleDigits } from '../../lib/string-utils';
 import { modelHelpers } from '../../lib/sudoku-model';
 import SudokuMiniGrid from '../sudoku-grid/sudoku-mini-grid';
@@ -61,7 +61,19 @@ function groupPuzzlesByMonth(puzzles) {
 }
 
 function NYTPuzzleList({ nytPuzzles, showRatings, shortenLinks }) {
-    const [collapsed, setCollapsed] = useState({});
+    const [expandedMonth, setExpandedMonth] = useState(null);
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    const puzzlesByMonth = useMemo(() => groupPuzzlesByMonth(nytPuzzles), [nytPuzzles]);
+    const monthNames = useMemo(() => Object.keys(puzzlesByMonth), [puzzlesByMonth]);
+
+    // Auto-expand the first month on mount
+    useEffect(() => {
+        if (!isInitialized && monthNames.length > 0) {
+            setExpandedMonth(monthNames[0]);
+            setIsInitialized(true);
+        }
+    }, [monthNames, isInitialized]);
 
     if (!nytPuzzles || nytPuzzles.length === 0) {
         return (
@@ -71,38 +83,40 @@ function NYTPuzzleList({ nytPuzzles, showRatings, shortenLinks }) {
         );
     }
 
-    const puzzlesByMonth = groupPuzzlesByMonth(nytPuzzles);
-    const monthNames = Object.keys(puzzlesByMonth);
-
-    const sections = monthNames.map((monthName, idx) => {
-        const isCollapsed = collapsed[monthName] !== undefined ? collapsed[monthName] : (idx > 0);
+    const sections = monthNames.map((monthName) => {
+        const isExpanded = expandedMonth === monthName;
         const puzzles = puzzlesByMonth[monthName];
 
-        const puzzleItems = puzzles.map((puzzle, i) => (
-            <NYTPuzzleItem
-                key={puzzle.id || i}
-                puzzle={puzzle}
-                showRatings={showRatings}
-                shortenLinks={shortenLinks}
-            />
-        ));
-
-        const toggleCollapsed = () => {
-            setCollapsed(prev => ({ ...prev, [monthName]: !isCollapsed }));
+        const toggleExpanded = (e) => {
+            e.stopPropagation();
+            setExpandedMonth(isExpanded ? null : monthName);
         };
 
-        const classes = `section nyt-month-section ${isCollapsed ? 'collapsed' : ''}`;
-
         return (
-            <div key={monthName} className={classes} onClick={toggleCollapsed}>
-                <h2>{monthName} <span className="puzzle-count">({puzzles.length})</span></h2>
-                <ul>{puzzleItems}</ul>
+            <div key={monthName} className={`nyt-month-section ${isExpanded ? 'expanded' : 'collapsed'}`}>
+                <h2 onClick={toggleExpanded}>
+                    <span className="month-name">{monthName}</span>
+                    <span className="puzzle-count">{puzzles.length} puzzles</span>
+                    <span className="chevron">{isExpanded ? '−' : '+'}</span>
+                </h2>
+                {isExpanded && (
+                    <ul>
+                        {puzzles.map((puzzle, i) => (
+                            <NYTPuzzleItem
+                                key={puzzle.id || i}
+                                puzzle={puzzle}
+                                showRatings={showRatings}
+                                shortenLinks={shortenLinks}
+                            />
+                        ))}
+                    </ul>
+                )}
             </div>
         );
     });
 
     return (
-        <div className="nyt-puzzles">
+        <div className="nyt-puzzles-list">
             {sections}
         </div>
     );
@@ -280,97 +294,98 @@ function HomePage({ nytPuzzles, showRatings, shortenLinks, onNewPuzzle, onImport
 
     return (
         <div className="home-page">
-            <div className="home-page-content">
+            <main className="home-page-content">
                 <section className="action-section">
-                    <h2>Get Started</h2>
-                    <div className="action-cards">
-                        <div className="action-card" onClick={onNewPuzzle}>
-                            <div className="action-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                                    <line x1="9" y1="3" x2="9" y2="21" />
-                                    <line x1="15" y1="3" x2="15" y2="21" />
-                                    <line x1="3" y1="9" x2="21" y2="9" />
-                                    <line x1="3" y1="15" x2="21" y2="15" />
+                    <div className="action-grid">
+                        <button className="action-btn primary" onClick={onNewPuzzle}>
+                            <div className="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
                             </div>
-                            <h3>New Puzzle</h3>
-                            <p>Create a new puzzle from scratch</p>
-                        </div>
+                            <div className="text">
+                                <h3>New Puzzle</h3>
+                                <p>Start fresh</p>
+                            </div>
+                        </button>
 
-                        <div className="action-card" onClick={onImportPuzzle}>
-                            <div className="action-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                    <polyline points="7 10 12 15 17 10" />
-                                    <line x1="12" y1="15" x2="12" y2="3" />
+                        <button className="action-btn secondary" onClick={onImportPuzzle}>
+                            <div className="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
                                 </svg>
                             </div>
-                            <h3>Import Puzzle</h3>
-                            <p>Paste or import a puzzle</p>
-                        </div>
+                            <div className="text">
+                                <h3>Import</h3>
+                                <p>Paste puzzle</p>
+                            </div>
+                        </button>
 
-                        <div className="action-card" onClick={onSettings}>
-                            <div className="action-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="3" />
-                                    <path d="M12 1v6m0 6v6m4.22-13.22l-4.24 4.24m-4.24 4.24L3.5 18.5m17-2.72l-4.24-4.24m-4.24-4.24L7.78 3.06" />
+                        <button className="action-btn secondary" onClick={onSettings}>
+                            <div className="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                                 </svg>
                             </div>
-                            <h3>Settings</h3>
-                            <p>Configure app preferences</p>
-                        </div>
+                            <div className="text">
+                                <h3>Settings</h3>
+                                <p>Preferences</p>
+                            </div>
+                        </button>
                     </div>
                 </section>
 
-                <section className="puzzles-section">
-                    <div className="tabs-container">
+                <section className="puzzles-explorer">
+                    <nav className="tabs">
                         <button 
-                            className={`tab ${activeTab === 'nyt' ? 'active' : ''}`}
+                            className={`tab-item ${activeTab === 'nyt' ? 'active' : ''}`}
                             onClick={() => setActiveTab('nyt')}
                         >
-                            NYT Puzzles
+                            NYT Archive
                         </button>
                         <button 
-                            className={`tab ${activeTab === 'in-progress' ? 'active' : ''}`}
+                            className={`tab-item ${activeTab === 'in-progress' ? 'active' : ''}`}
                             onClick={() => setActiveTab('in-progress')}
                         >
-                            In Progress {inProgressPuzzles.length > 0 && <span className="badge">{inProgressPuzzles.length}</span>}
+                            In Progress {inProgressPuzzles.length > 0 && <span className="count">{inProgressPuzzles.length}</span>}
                         </button>
                         <button 
-                            className={`tab ${activeTab === 'history' ? 'active' : ''}`}
+                            className={`tab-item ${activeTab === 'history' ? 'active' : ''}`}
                             onClick={() => setActiveTab('history')}
                         >
-                            History {historyPuzzles.length > 0 && <span className="badge">{historyPuzzles.length}</span>}
+                            History {historyPuzzles.length > 0 && <span className="count">{historyPuzzles.length}</span>}
                         </button>
+                    </nav>
+
+                    <div className="tab-panels">
+                        {activeTab === 'nyt' && (
+                            <div className="panel">
+                                <NYTPuzzleList 
+                                    nytPuzzles={nytPuzzles}
+                                    showRatings={showRatings}
+                                    shortenLinks={shortenLinks}
+                                />
+                            </div>
+                        )}
+
+                        {activeTab === 'in-progress' && (
+                            <div className="panel">
+                                {renderInProgressPuzzles()}
+                            </div>
+                        )}
+
+                        {activeTab === 'history' && (
+                            <div className="panel">
+                                {renderHistoryPuzzles()}
+                            </div>
+                        )}
                     </div>
-
-                    {activeTab === 'nyt' && (
-                        <div className="tab-content">
-                            <p className="section-description">Select from a collection of New York Times Sudoku puzzles</p>
-                            <NYTPuzzleList 
-                                nytPuzzles={nytPuzzles}
-                                showRatings={showRatings}
-                                shortenLinks={shortenLinks}
-                            />
-                        </div>
-                    )}
-
-                    {activeTab === 'in-progress' && (
-                        <div className="tab-content">
-                            <p className="section-description">Continue solving your active puzzles</p>
-                            {renderInProgressPuzzles()}
-                        </div>
-                    )}
-
-                    {activeTab === 'history' && (
-                        <div className="tab-content">
-                            <p className="section-description">Review your completed and abandoned puzzles</p>
-                            {renderHistoryPuzzles()}
-                        </div>
-                    )}
                 </section>
-            </div>
+            </main>
         </div>
     );
 }

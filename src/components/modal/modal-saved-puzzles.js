@@ -50,19 +50,20 @@ function SavedPuzzle({puzzleState, showRatings, shortenLinks, discardHandler, is
 function OneSavedPuzzle({puzzleState, showRatings, shortenLinks, discardHandler, cancelHandler}) {
     return <>
         <h1>Continue or discard?</h1>
-        <p>Click <b>Continue</b> to return to this saved puzzle and pick up where
-        you left off, <b>Discard</b> to forget it, or <b>Cancel</b> to go back to the main menu.</p>
-        <SavedPuzzle
-            puzzleState={puzzleState}
-            showRatings={showRatings}
-            shortenLinks={shortenLinks}
-            isLast={true}
-        />
+        <p>You have a saved game for this puzzle. Pick up where you left off or discard it.</p>
+        <div className="mb-6">
+            <SavedPuzzle
+                puzzleState={puzzleState}
+                showRatings={showRatings}
+                shortenLinks={shortenLinks}
+                isLast={true}
+            />
+        </div>
         <div className="buttons">
-            <a className="btn primary" href={puzzleLink(puzzleState, shortenLinks)}>Continue</a>
-            <button className="cancel" onClick={discardHandler}
+            <button className="secondary" onClick={cancelHandler}>Cancel</button>
+            <button className="danger" onClick={discardHandler}
                 data-puzzle-state-key={puzzleState.puzzleStateKey}>Discard</button>
-            <button className="cancel" onClick={cancelHandler}>Cancel</button>
+            <a className="button primary" href={puzzleLink(puzzleState, shortenLinks)}>Continue</a>
         </div>
     </>;
 }
@@ -80,11 +81,13 @@ function SavedPuzzleList({savedPuzzles=[], showRatings, shortenLinks, discardHan
         />
     });
     return <>
-        <h1>Incomplete puzzles</h1>
-        <p>Select a puzzle to return to, or discard a partially completed puzzle</p>
-        {puzzles}
+        <h1>In-progress Puzzles</h1>
+        <p>Select a puzzle to resume or discard it to clear space.</p>
+        <div className="space-y-4">
+            {puzzles}
+        </div>
         <div className="buttons">
-            <button className="cancel" onClick={cancelHandler}>Cancel</button>
+            <button className="secondary" onClick={cancelHandler}>Back</button>
         </div>
     </>;
 }

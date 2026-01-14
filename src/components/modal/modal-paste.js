@@ -28,12 +28,17 @@ export default function ModalPaste({modalHandler}) {
     }
     return (
         <div className="modal paste">
-            <h1>Paste a puzzle</h1>
-            <p>Paste a string of 81 digits below:</p>
-            <textarea value={newDigits} onChange={inputHandler} autoFocus />
+            <h1>Import Puzzle</h1>
+            <p>Paste a string of 81 digits or a shortened puzzle link.</p>
+            <textarea 
+                value={newDigits} 
+                onChange={inputHandler} 
+                placeholder="00000000000..."
+                autoFocus 
+            />
             <div className="buttons">
-                <button className="cancel" onClick={cancelHandler}>Cancel</button>
-                <button className={submitClass} onClick={pasteHandler} disabled={!haveValidDigits}>Start</button>
+                <button className="secondary" onClick={cancelHandler}>Cancel</button>
+                <button className={submitClass} onClick={pasteHandler} disabled={!haveValidDigits}>Start Solving</button>
             </div>
         </div>
     );

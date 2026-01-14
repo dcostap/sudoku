@@ -30,8 +30,8 @@ function ModalResumeRestart({modalState, modalHandler}) {
                 />
             </div>
             <div className="buttons">
+                <button className="secondary" onClick={restartHandler}>Restart</button>
                 <button className="primary" onClick={resumeHandler} autoFocus={true}>Continue</button>
-                <button className="primary" onClick={restartHandler}>Restart</button>
             </div>
         </div>
     );

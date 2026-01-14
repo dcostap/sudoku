@@ -606,66 +606,46 @@ function App() {
 
     const winSize = useWindowSize(400);
     const dimensions = useMemo(() => getDimensions(winSize), [winSize]);
-    
+
+    // Data and handlers for Home Page / Home Modals
+    const nytPuzzles = useMemo(() => (isHomePage || isHomePageModal) ? loadNYTPuzzles() : [], [isHomePage, isHomePageModal]);
+    const homeSettings = useMemo(() => {
+        const savedSettings = localStorage.getItem('settings');
+        return savedSettings ? JSON.parse(savedSettings) : {};
+    }, []);
+
+    const handleNewPuzzle = useCallback(() => {
+        window.history.pushState({ view: 'new-puzzle' }, '', '/?new');
+        setGrid(newSudokuModel({
+            initialDigits: '0'.repeat(81),
+            skipCheck: true,
+            onPuzzleStateChange: grid => {
+                document.body.dataset.currentSnapshot = grid.get('currentSnapshot');
+                modelHelpers.persistPuzzleState(grid);
+            }
+        }));
+    }, [setGrid]);
+
+    const handleImportPuzzle = useCallback(() => {
+        window.history.pushState({ view: 'import' }, '', '/?import');
+        const tempGrid = newSudokuModel({ initialDigits: '0'.repeat(81), skipCheck: true, onPuzzleStateChange: () => {} });
+        setGrid(modelHelpers.showPasteModal(tempGrid));
+    }, [setGrid]);
+
+    const handleSettings = useCallback(() => {
+        window.history.pushState({ view: 'settings' }, '', '/?settings');
+        const tempGrid = newSudokuModel({ initialDigits: '0'.repeat(81), skipCheck: true, onPuzzleStateChange: () => {} });
+        setGrid(modelHelpers.showSettingsModal(tempGrid));
+    }, [setGrid]);
+
+    const handleAbout = useCallback(() => {
+        window.history.pushState({ view: 'about' }, '', '/?about');
+        const tempGrid = newSudokuModel({ initialDigits: '0'.repeat(81), skipCheck: true, onPuzzleStateChange: () => {} });
+        setGrid(modelHelpers.showAboutModal(tempGrid));
+    }, [setGrid]);
+
     // Now we can do conditional rendering after all hooks are called
     if (isHomePage) {
-        const nytPuzzles = loadNYTPuzzles();
-        
-        // Load settings from localStorage
-        const savedSettings = localStorage.getItem('settings');
-        const homeSettings = savedSettings ? JSON.parse(savedSettings) : {};
-        
-        const handleNewPuzzle = () => {
-            // Push state to enable back button
-            window.history.pushState({ view: 'new-puzzle' }, '', '/?new');
-            // Create empty puzzle in enter mode
-            const emptyGrid = newSudokuModel({
-                initialDigits: '0'.repeat(81),
-                skipCheck: true,
-                onPuzzleStateChange: grid => {
-                    document.body.dataset.currentSnapshot = grid.get('currentSnapshot');
-                    modelHelpers.persistPuzzleState(grid);
-                }
-            });
-            setGrid(emptyGrid);
-        };
-        
-        const handleImportPuzzle = () => {
-            // Push state to enable back button
-            window.history.pushState({ view: 'import' }, '', '/?import');
-            // Create a minimal grid to show the paste modal
-            const tempGrid = newSudokuModel({
-                initialDigits: '0'.repeat(81),
-                skipCheck: true,
-                onPuzzleStateChange: () => {}
-            });
-            setGrid(modelHelpers.showPasteModal(tempGrid));
-        };
-        
-        const handleSettings = () => {
-            // Push state to enable back button
-            window.history.pushState({ view: 'settings' }, '', '/?settings');
-            // Create a minimal grid to show the settings modal
-            const tempGrid = newSudokuModel({
-                initialDigits: '0'.repeat(81),
-                skipCheck: true,
-                onPuzzleStateChange: () => {}
-            });
-            setGrid(modelHelpers.showSettingsModal(tempGrid));
-        };
-        
-        const handleAbout = () => {
-            // Push state to enable back button
-            window.history.pushState({ view: 'about' }, '', '/?about');
-            // Create a minimal grid to show the about modal
-            const tempGrid = newSudokuModel({
-                initialDigits: '0'.repeat(81),
-                skipCheck: true,
-                onPuzzleStateChange: () => {}
-            });
-            setGrid(modelHelpers.showAboutModal(tempGrid));
-        };
-        
         return (
             <div className="sudoku-app">
                 <SvgSprites />
@@ -685,17 +665,13 @@ function App() {
     if (isHomePageModal) {
         const homeModalHandler = (a) => {
             if (a === 'cancel' || a === 'close' || a === 'cancel-paste') {
-                // Return to home page
                 setGrid(null);
             } else if (a.action === 'save-settings') {
-                // Apply settings then return to home page
                 modelHelpers.applyModalAction(grid, a);
                 setGrid(null);
             } else if (a.action === 'save-feature-flags') {
-                // Feature flags save will reload the page
                 setGrid((grid) => modelHelpers.applyModalAction(grid, a));
             } else {
-                // For paste-initial-digits and other actions, let them handle navigation
                 setGrid((grid) => modelHelpers.applyModalAction(grid, a));
             }
         };
@@ -703,6 +679,15 @@ function App() {
         return (
             <div className="sudoku-app">
                 <SvgSprites />
+                <HomePage
+                    nytPuzzles={nytPuzzles}
+                    showRatings={homeSettings[SETTINGS.showRatings]}
+                    shortenLinks={homeSettings[SETTINGS.shortenLinks]}
+                    onNewPuzzle={handleNewPuzzle}
+                    onImportPuzzle={handleImportPuzzle}
+                    onSettings={handleSettings}
+                    onAbout={handleAbout}
+                />
                 <ModalContainer
                     modalState={modalState}
                     modalHandler={homeModalHandler}
