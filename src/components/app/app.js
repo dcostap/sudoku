@@ -583,7 +583,7 @@ function App() {
         ? (
             <div className="flex justify-center mt-6">
                 <button 
-                    className="px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white text-xl font-black rounded-2xl shadow-lg shadow-primary-500/30 transition-all active:scale-95" 
+                    className="btn" 
                     onClick={handleStart}
                 >
                     START PUZZLE

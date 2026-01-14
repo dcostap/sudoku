@@ -3,6 +3,7 @@ import { compressPuzzleDigits } from '../../lib/string-utils';
 import { modelHelpers } from '../../lib/sudoku-model';
 import SudokuMiniGrid from '../sudoku-grid/sudoku-mini-grid';
 import './home-page.css';
+import '../new-styles.css';
 
 function stopPropagation(e) {
     e.stopPropagation();

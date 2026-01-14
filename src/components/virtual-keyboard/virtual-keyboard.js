@@ -4,7 +4,7 @@ import { keyboardLayout } from './vkbd-keyboard-layouts';
 import VkbdButtonIcon from './vkbd-button-icons';
 import VkbdModePanel from './vkbd-mode-panel';
 
-import "./virtual-keyboard.css";
+import "../new-styles.css";
 
 
 const stopPropagation = (e) => e.stopPropagation();

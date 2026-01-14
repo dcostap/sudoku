@@ -25,10 +25,12 @@
         background-color: var(--link-bg-color);
     }
 
-    a:hover {
-        color: var(--link-hover-text-color);
-        background-color: var(--link-hover-bg-color);
-        border-bottom: 1px solid var(--link-hover-text-color);
+    @media (hover: hover) {
+        a:hover {
+            color: var(--link-hover-text-color);
+            background-color: var(--link-hover-bg-color);
+            border-bottom: 1px solid var(--link-hover-text-color);
+        }
     }
 }
 
@@ -258,9 +260,11 @@
     background-color: var(--button-bg-color);
 }
 
-button:hover,
-a.btn:hover {
-    box-shadow: var(--button-hover-shadow);
+@media (hover: hover) {
+    button:hover,
+    a.btn:hover {
+        box-shadow: var(--button-hover-shadow);
+    }
 }
 
 .portrait .buttons a {

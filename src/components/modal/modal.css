@@ -7,7 +7,7 @@
 }
 
 .modal {
-    @apply relative max-w-lg w-full max-h-[90vh] overflow-y-auto p-8 bg-white rounded-3xl shadow-2xl animate-scale-in;
+    @apply relative max-w-lg w-full max-h-[90vh] overflow-y-auto touch-pan-y p-8 bg-white rounded-3xl shadow-2xl animate-scale-in;
     box-sizing: border-box;
     color: #1e293b;
 }
@@ -477,7 +477,6 @@ input.toggle:checked + .indicator::before {
 @media screen and (max-width: 500px) {
     .modal {
         max-width: 94vw;
-        padding: 0.6em 0.6em 0 0.6em;
     }
 
     .difficulty-options {

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 
 import './sudoku-grid.css';
+import '../new-styles.css';
 
 import { SETTINGS } from '../../lib/sudoku-model.js';
 

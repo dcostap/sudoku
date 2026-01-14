@@ -11,7 +11,6 @@ const stopPropagation = (e) => e.stopPropagation();
 
 
 function SiteLink () {
-    // subtle link to go back to / 
     return (
         <a href="/" className="text-lg font-semibold text-gray-800 hover:text-primary-600 transition-colors duration-200">
              ❮ Go back
@@ -44,7 +43,7 @@ function StatusBar ({
         ) : null;
     return (
         <div className="fixed top-0 left-0 w-full h-[7.5vh]z-50" onMouseDown={stopPropagation}>
-            <div className="h-full flex items-center justify-between px-4">
+            <div className="h-full flex items-center justify-between px-4 pt-2">
                 <div className="hidden md:block flex-1">
                     <SiteLink />
                 </div>
