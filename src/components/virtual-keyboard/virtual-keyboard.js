@@ -19,7 +19,7 @@ export default function VirtualKeyboard({ inputMode, completedDigits, inputHandl
         const isActive = inputMode === internalMode;
         return (
             <button 
-                className={`vk-btn vk-btn-label ${isActive ? 'vk-btn-active' : ''}`}
+                className={`btn h-16 w-24 text-xl  active:scale-95 ${isActive ? 'btn-primary' : ''}`}
                 onClick={() => handleAction(`input-mode-${internalMode}`, internalMode === 'color')}
             >
                 {label}
@@ -31,7 +31,7 @@ export default function VirtualKeyboard({ inputMode, completedDigits, inputHandl
         const isCompleted = completedDigits[num];
         return (
             <button 
-                className={`vk-btn vk-btn-primary ${isCompleted ? 'vkbd-digit-completed' : ''}`}
+                className={`btn btn-primary h-16 w-16 text-2xl  active:scale-95 ${isCompleted ? 'opacity-25 cursor-default pointer-events-none' : ''}`}
                 onClick={() => !isCompleted && handleAction(num.toString(), true)}
                 disabled={isCompleted}
             >
@@ -41,61 +41,63 @@ export default function VirtualKeyboard({ inputMode, completedDigits, inputHandl
     };
 
     return (
-        <div className="vkbd-container" onMouseDown={stopPropagation}>
-            {/* Row 1 */}
-            {modeBtn('Normal', 'digit', 'digit')}
-            {digitBtn(1)}
-            {digitBtn(2)}
-            {digitBtn(3)}
+        <div className="flex flex-col gap-1 w-full max-w-[500px] mx-auto p-4 select-none bg-transparent touch-manipulation" onMouseDown={stopPropagation}>
+            <div className="flex gap-2 justify-center">
+                {/* Modes Sidebar */}
+                <div className="flex flex-col gap-2">
+                    {modeBtn('Normal', 'digit', 'digit')}
+                    {modeBtn('Corner', 'outer', 'outer')}
+                    {modeBtn('Centre', 'inner', 'inner')}
+                    {modeBtn('Colour', 'color', 'color')}
+                </div>
 
-            {/* Row 2 */}
-            {modeBtn('Corner', 'outer', 'outer')}
-            {digitBtn(4)}
-            {digitBtn(5)}
-            {digitBtn(6)}
+                {/* Digits Grid */}
+                <div className="grid grid-cols-3 gap-2">
+                    {digitBtn(1)}
+                    {digitBtn(2)}
+                    {digitBtn(3)}
+                    {digitBtn(4)}
+                    {digitBtn(5)}
+                    {digitBtn(6)}
+                    {digitBtn(7)}
+                    {digitBtn(8)}
+                    {digitBtn(9)}
+                    <button 
+                        className="btn h-16 text-xl col-span-3 active:scale-95"
+                        onClick={() => handleAction('delete')}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
 
-            {/* Row 3 */}
-            {modeBtn('Centre', 'inner', 'inner')}
-            {digitBtn(7)}
-            {digitBtn(8)}
-            {digitBtn(9)}
-
-            {/* Row 4 */}
-            {modeBtn('Colour', 'color', 'color')}
-            <button 
-                className="vk-btn vk-btn-label vk-btn-span-3"
-                onClick={() => handleAction('delete')}
-            >
-                Delete
-            </button>
-
-            {/* Row 5 */}
-            <button 
-                className="vk-btn vk-btn-label vk-btn-span-2"
-                onClick={() => handleAction('undo')}
-            >
-                Undo
-            </button>
-            <button 
-                className="vk-btn vk-btn-label vk-btn-span-2"
-                onClick={() => handleAction('redo')}
-            >
-                Redo
-            </button>
-
-            {/* Row 6 */}
-            <button 
-                className="vk-btn vk-btn-label vk-btn-span-2"
-                onClick={() => handleAction('restart')}
-            >
-                Restart
-            </button>
-            <button 
-                className="vk-btn vk-btn-label vk-btn-span-2"
-                onClick={() => handleAction('check')}
-            >
-                Check
-            </button>
+            {/* Bottom Row Actions */}
+            <div className="grid grid-cols-2 gap-3 mt-3">
+                <button 
+                    className="btn h-14 active:scale-95"
+                    onClick={() => handleAction('undo')}
+                >
+                    Undo
+                </button>
+                <button 
+                    className="btn h-14 active:scale-95"
+                    onClick={() => handleAction('redo')}
+                >
+                    Redo
+                </button>
+                <button 
+                    className="btn h-14 active:scale-95"
+                    onClick={() => handleAction('restart')}
+                >
+                    Restart
+                </button>
+                <button 
+                    className="btn h-14 active:scale-95"
+                    onClick={() => handleAction('check')}
+                >
+                    Check
+                </button>
+            </div>
         </div>
     );
 }

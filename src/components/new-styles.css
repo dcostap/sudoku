@@ -1,159 +1,28 @@
-/* src/styles.css */
+/* src/components/new-styles.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer components {
+  .btn-base {
+    @apply inline-flex items-center justify-center 
+           cursor-pointer select-none box-border
+           transform-gpu [backface-visibility:hidden]
+           antialiased transition-none px-[0.7rem] py-[0.3rem]
+           rounded-xl;
+  }
+
+  /* Secondary Button */
   .btn {
-    @apply
-      inline-flex items-center justify-center
-      px-5 py-2.5
-      rounded-md
-      font-medium
-      border
-      transition-colors duration-150
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-      bg-white text-neutral-900 border-neutral-300
-      hover:bg-neutral-100
-      focus-visible:ring-neutral-400
-      ring-offset-white
-      dark:bg-neutral-900 dark:text-white dark:border-neutral-700
-      dark:hover:bg-neutral-800
-      dark:focus-visible:ring-neutral-600
-      dark:ring-offset-neutral-900;
+    @apply btn-base text-black bg-white
+           shadow-[inset_0_0_0_1px_theme(colors.gray.300)] border-none
+           hover:bg-gray-100 hover:shadow-[inset_0_0_0_1px_theme(colors.gray.300)];
   }
 
+  /* Primary Button */
   .btn-primary {
-    @apply
-      inline-flex items-center justify-center
-      px-5 py-2.5
-      rounded-md
-      font-medium
-      border
-      transition-colors duration-150
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-      bg-neutral-800 text-white border-neutral-800
-      hover:bg-neutral-800
-      focus-visible:ring-neutral-500
-      ring-offset-white
-      dark:bg-neutral-900 dark:text-white dark:border-neutral-700
-      dark:hover:bg-neutral-800
-      dark:focus-visible:ring-neutral-800
-      dark:ring-offset-neutral-900;
+    @apply btn-base text-white bg-black
+           shadow-[inset_0_0_0_1px_theme(colors.gray.700)] border-none
+           hover:bg-gray-800 hover:shadow-[inset_0_0_0_1px_theme(colors.gray.600)];
   }
 }
-/* =========================
-   Virtual Keyboard Design
-   ========================= */
-
-.vkbd-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 16px;
-  user-select: none;
-  background-color: transparent;
-  touch-action: manipulation;
-}
-
-.vk-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 64px;
-  border-radius: 12px;
-  font-size: 26px;
-  font-weight: 600;
-  transition: all 0.15s ease-in-out;
-  border: 1.5px solid #d1d5db;
-  background-color: white;
-  color: #6b21a8;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.vk-btn:hover {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
-}
-
-.vk-btn:active {
-  transform: scale(0.96);
-  background-color: #f3f4f6;
-}
-
-/* Purple buttons (Digits) */
-.vk-btn-primary {
-  background-color: #6b21a8;
-  color: white;
-  border-color: #6b21a8;
-}
-
-.vk-btn-primary:hover {
-  background-color: #581c87;
-  border-color: #581c87;
-}
-
-/* Active Mode Button */
-.vk-btn-active {
-  background-color: #6b21a8 !important;
-  color: white !important;
-  border-color: #6b21a8 !important;
-}
-
-.vk-btn-active:hover {
-  background-color: #581c87 !important;
-}
-
-/* Span buttons */
-.vk-btn-span-3 {
-  grid-column: span 3;
-}
-
-.vk-btn-span-2 {
-  grid-column: span 2;
-}
-
-/* Specific text sizing for labels */
-.vk-btn-label {
-  font-size: 20px;
-  padding: 0 8px;
-}
-
-.vkbd-digit-completed {
-  opacity: 0.25;
-  cursor: default;
-  pointer-events: none;
-}
-
-.dark .vk-btn {
-  background-color: #111827;
-  border-color: #374151;
-  color: #a855f7;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.dark .vk-btn:hover {
-  background-color: #1f2937;
-  border-color: #4b5563;
-}
-
-.dark .vk-btn-primary {
-  background-color: #7e22ce;
-  border-color: #7e22ce;
-  color: white;
-}
-
-.dark .vk-btn-primary:hover {
-  background-color: #9333ea;
-}
-
-.dark .vk-btn-active {
-  background-color: #7e22ce !important;
-  color: white !important;
-  border-color: #7e22ce !important;
-}
-
