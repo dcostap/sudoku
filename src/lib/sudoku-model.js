@@ -352,6 +352,20 @@ export const modelHelpers = {
         return match ? match.difficulty : null;
     },
 
+    getNYTInfo: (initialDigits) => {
+        const nytPuzzles = loadNYTPuzzles();
+        const match = nytPuzzles.find(p => p.digits === initialDigits);
+        if (match) {
+            return {
+                id: match.id,
+                date: match.date,
+                difficulty: match.difficulty,
+                source: match.source
+            };
+        }
+        return null;
+    },
+
     fetchExplainPlan: (grid, setGrid, retryInterval, maxRetries) => {
         const modalState = grid.get('modalState');
         delete modalState.fetchRequired;    // Naughty, but we don't want a re-render

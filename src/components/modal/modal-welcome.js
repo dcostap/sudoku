@@ -3,47 +3,10 @@ import { useState } from 'react';
 import { compressPuzzleDigits } from '../../lib/string-utils';
 
 import SudokuMiniGrid from '../sudoku-grid/sudoku-mini-grid';
+import PuzzleItem from '../puzzle-item/puzzle-item';
 
 function stopPropagation (e) {
     e.stopPropagation();
-}
-
-function NYTPuzzleItem({ puzzle, showRatings, shortenLinks }) {
-    const puzzleString = shortenLinks
-        ? compressPuzzleDigits(puzzle.digits)
-        : puzzle.digits;
-
-    // Map difficulty to level number for URL compatibility
-    const difficultyLevelMap = {
-        'easy': '1',
-        'medium': '2',
-        'hard': '3',
-        'expert': '4',
-    };
-    const level = difficultyLevelMap[puzzle.difficulty] || '3';
-
-    // Format date as "May 13, 2023"
-    const dateStr = puzzle.date
-        ? puzzle.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-        : '';
-
-    const difficultyBadge = puzzle.difficulty
-        ? <span className={`difficulty-badge ${puzzle.difficulty}`}>{puzzle.difficulty}</span>
-        : null;
-
-    return (
-        <li>
-            <a href={`./?s=${puzzleString}&d=${level}`} onClick={stopPropagation}>
-                <div className="nyt-puzzle-item">
-                    <SudokuMiniGrid puzzle={puzzle} showRatings={showRatings} />
-                    <div className="nyt-puzzle-info">
-                        <div className="nyt-puzzle-date">{dateStr}</div>
-                        {difficultyBadge}
-                    </div>
-                </div>
-            </a>
-        </li>
-    );
 }
 
 function groupPuzzlesByMonth(puzzles) {
@@ -80,12 +43,14 @@ function NYTPuzzleList({ modalState }) {
         const puzzles = puzzlesByMonth[monthName];
 
         const puzzleItems = puzzles.map((puzzle, i) => (
-            <NYTPuzzleItem
-                key={puzzle.id || i}
-                puzzle={puzzle}
-                showRatings={showRatings}
-                shortenLinks={shortenLinks}
-            />
+            <li key={puzzle.id || i}>
+                <PuzzleItem
+                    puzzle={puzzle}
+                    showRatings={showRatings}
+                    shortenLinks={shortenLinks}
+                    type="nyt"
+                />
+            </li>
         ));
 
         const toggleCollapsed = () => {

@@ -2,49 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { compressPuzzleDigits } from '../../lib/string-utils';
 import { modelHelpers } from '../../lib/sudoku-model';
 import SudokuMiniGrid from '../sudoku-grid/sudoku-mini-grid';
+import PuzzleItem from '../puzzle-item/puzzle-item';
 import './home-page.css';
 import '../new-styles.css';
 
 function stopPropagation(e) {
     e.stopPropagation();
-}
-
-function NYTPuzzleItem({ puzzle, showRatings, shortenLinks }) {
-    const puzzleString = shortenLinks
-        ? compressPuzzleDigits(puzzle.digits)
-        : puzzle.digits;
-
-    // Map difficulty to level number for URL compatibility
-    const difficultyLevelMap = {
-        'easy': '1',
-        'medium': '2',
-        'hard': '3',
-        'expert': '4',
-    };
-    const level = difficultyLevelMap[puzzle.difficulty] || '3';
-
-    // Format date as "May 13, 2023"
-    const dateStr = puzzle.date
-        ? puzzle.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-        : '';
-
-    const difficultyBadge = puzzle.difficulty
-        ? <span className={`difficulty-badge ${puzzle.difficulty}`}>{puzzle.difficulty}</span>
-        : null;
-
-    return (
-        <li>
-            <a href={`./?s=${puzzleString}&d=${level}`} onClick={stopPropagation}>
-                <div className="nyt-puzzle-item">
-                    <SudokuMiniGrid puzzle={puzzle} showRatings={showRatings} />
-                    <div className="nyt-puzzle-info">
-                        <div className="nyt-puzzle-date">{dateStr}</div>
-                        {difficultyBadge}
-                    </div>
-                </div>
-            </a>
-        </li>
-    );
 }
 
 function groupPuzzlesByMonth(puzzles) {
@@ -94,12 +57,14 @@ function NYTPuzzleList({ nytPuzzles, showRatings, shortenLinks }) {
                 {isExpanded && (
                     <ul>
                         {puzzles.map((puzzle, i) => (
-                            <NYTPuzzleItem
-                                key={puzzle.id || i}
-                                puzzle={puzzle}
-                                showRatings={showRatings}
-                                shortenLinks={shortenLinks}
-                            />
+                            <li key={puzzle.id || i}>
+                                <PuzzleItem
+                                    puzzle={puzzle}
+                                    showRatings={showRatings}
+                                    shortenLinks={shortenLinks}
+                                    type="nyt"
+                                />
+                            </li>
                         ))}
                     </ul>
                 )}
@@ -180,41 +145,15 @@ function HomePage({ nytPuzzles, showRatings, shortenLinks, onNewPuzzle, onImport
 
         return (
             <div className="saved-puzzles-list">
-                {inProgressPuzzles.map((puzzle, idx) => {
-                    const puzzleString = shortenLinks
-                        ? compressPuzzleDigits(puzzle.initialDigits)
-                        : puzzle.initialDigits;
-                    
-                    const dateStr = new Date(puzzle.lastUpdatedTime).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-
-                    return (
-                        <div key={idx} className="saved-puzzle-item">
-                            <a href={`./?s=${puzzleString}&d=${puzzle.difficultyLevel || ''}&r=1`}>
-                                <SudokuMiniGrid 
-                                    puzzle={{ 
-                                        digits: puzzle.completedDigits || puzzle.initialDigits,
-                                        difficulty: puzzle.difficultyRating
-                                    }} 
-                                    showRatings={showRatings} 
-                                />
-                                <div className="saved-puzzle-info">
-                                    <div className="saved-puzzle-time">
-                                        <strong>Time:</strong> {formatElapsedTime(puzzle.elapsedTime)}
-                                    </div>
-                                    <div className="saved-puzzle-date">
-                                        Last played: {dateStr}
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    );
-                })}
+                {inProgressPuzzles.map((puzzle, idx) => (
+                    <PuzzleItem 
+                        key={idx}
+                        puzzle={puzzle}
+                        showRatings={showRatings}
+                        shortenLinks={shortenLinks}
+                        type="saved"
+                    />
+                ))}
             </div>
         );
     };
@@ -230,62 +169,15 @@ function HomePage({ nytPuzzles, showRatings, shortenLinks, onNewPuzzle, onImport
 
         return (
             <div className="history-puzzles-list">
-                {historyPuzzles.map((entry, idx) => {
-                    const puzzleString = shortenLinks
-                        ? compressPuzzleDigits(entry.initialDigits)
-                        : entry.initialDigits;
-                    
-                    const dateStr = new Date(entry.archivedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-
-                    const isDraft = entry.mode === 'enter';
-
-                    let statusBadge = entry.status === 'solved' 
-                        ? <span className="status-badge solved">✓ Solved</span>
-                        : <span className="status-badge abandoned">Abandoned</span>;
-
-                    if (isDraft) {
-                        statusBadge = <span className="status-badge draft">✎ Draft / In Design</span>;
-                    }
-
-                    // Create URLs for replay and solve again
-                    const replayUrl = `./?s=${puzzleString}&d=${entry.difficultyLevel || ''}&replay=1&attempt=${entry.attemptIndex}`;
-                    const solveAgainUrl = `./?s=${puzzleString}&d=${entry.difficultyLevel || ''}${isDraft ? '&mode=enter' : ''}`;
-
-                    return (
-                        <div key={idx} className="history-puzzle-item">
-                            <SudokuMiniGrid 
-                                puzzle={{ 
-                                    digits: entry.initialDigits,
-                                    difficulty: entry.difficultyRating
-                                }} 
-                                showRatings={showRatings} 
-                            />
-                            <div className="history-puzzle-info">
-                                {statusBadge}
-                                <div className="history-puzzle-time">
-                                    <strong>Time:</strong> {formatElapsedTime(entry.elapsedTime)}
-                                </div>
-                                <div className="history-puzzle-date">
-                                    New York Times - {dateStr}
-                                </div>
-                                <div className="history-puzzle-actions">
-                                    <a href={replayUrl} className="btn-small btn-secondary">
-                                        ▶ Replay
-                                    </a>
-                                    <a href={solveAgainUrl} className="btn-small btn-primary">
-                                        {isDraft ? '✎ Continue Design' : '↻ Solve Again'}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+                {historyPuzzles.map((entry, idx) => (
+                    <PuzzleItem 
+                        key={idx}
+                        puzzle={entry}
+                        showRatings={showRatings}
+                        shortenLinks={shortenLinks}
+                        type="history"
+                    />
+                ))}
             </div>
         );
     };

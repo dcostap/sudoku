@@ -1,0 +1,89 @@
+/* PuzzleItem common styles */
+.puzzle-item {
+    @apply bg-white border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200;
+}
+
+.puzzle-item:hover {
+    @apply border-primary-300 shadow-md transform scale-[1.02];
+}
+
+.puzzle-item a {
+    @apply flex flex-col no-underline text-inherit h-full;
+}
+
+.puzzle-info {
+    @apply p-3 flex flex-col gap-1 flex-1;
+}
+
+/* NYT specific style */
+.puzzle-item.nyt {
+    @apply flex flex-col items-center;
+}
+
+.puzzle-item.nyt a {
+    @apply items-center text-center w-full;
+}
+
+.puzzle-item.nyt .puzzle-info {
+    @apply p-2 pt-0;
+}
+
+.puzzle-date {
+    @apply text-[11px] font-bold text-gray-900 block;
+}
+
+.difficulty-badge {
+    @apply text-[9px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded-sm self-center;
+}
+
+.difficulty-badge.easy { @apply bg-emerald-100 text-emerald-700; }
+.difficulty-badge.medium { @apply bg-amber-100 text-amber-700; }
+.difficulty-badge.hard { @apply bg-rose-100 text-rose-700; }
+.difficulty-badge.expert { @apply bg-slate-800 text-white; }
+
+/* Saved/History specific styles */
+.puzzle-item.saved .puzzle-info,
+.puzzle-item.history .puzzle-info {
+    @apply p-4;
+}
+
+.puzzle-time {
+    @apply text-sm font-medium text-gray-900;
+}
+
+.puzzle-item.saved .puzzle-date,
+.puzzle-item.history .puzzle-date {
+    @apply text-xs text-gray-400;
+}
+
+.nyt-tag {
+    @apply mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-lg border border-blue-100;
+}
+
+.nyt-icon {
+    @apply bg-blue-600 text-white px-1 rounded-sm text-[8px];
+}
+
+.status-badge {
+    @apply inline-flex items-center self-start px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full mb-2;
+}
+
+.status-badge.solved { @apply bg-green-100 text-green-700; }
+.status-badge.abandoned { @apply bg-gray-100 text-gray-600; }
+.status-badge.draft { @apply bg-blue-100 text-blue-700; }
+
+.puzzle-actions {
+    @apply grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-gray-50;
+}
+
+.puzzle-item .btn-small {
+    @apply px-3 py-2 text-xs font-bold rounded-lg text-center transition-colors;
+}
+
+.puzzle-item .btn-small.btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+}
+
+.puzzle-item .btn-small.btn-secondary {
+    @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
+}
