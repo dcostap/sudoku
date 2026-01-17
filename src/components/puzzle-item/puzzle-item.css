@@ -27,12 +27,12 @@
     @apply text-sm uppercase tracking-widest block truncate;
 }
 
-.difficulty-badge {
-    @apply text-sm uppercase tracking-widest px-1.5 py-0.5 border border-theme-border bg-theme-bg self-start;
+.puzzle-tags {
+    @apply flex flex-row flex-wrap gap-2 items-center mb-0.5;
 }
 
-.puzzle-item.nyt .difficulty-badge {
-    @apply self-center;
+.difficulty-badge {
+    @apply text-sm uppercase tracking-widest px-1.5 py-0.5 border border-theme-border bg-theme-bg self-start;
 }
 
 .difficulty-badge.easy { @apply text-theme-text; }
@@ -49,11 +49,7 @@
 }
 
 .nyt-tag {
-    @apply mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 border border-theme-border text-sm uppercase tracking-widest self-start;
-}
-
-.nyt-icon {
-    @apply bg-theme-accent text-theme-accentText px-1 text-[8px];
+    @apply flex items-center px-1.5 py-0.5 border border-theme-border bg-theme-bg text-sm uppercase tracking-widest;
 }
 
 .status-badge {

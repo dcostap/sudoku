@@ -6,7 +6,7 @@
     }
 
     .timer-elapsed {
-        @apply text-xs uppercase tracking-widest;
+        @apply text-sm uppercase tracking-widest;
     }
 
     .timer-hints {

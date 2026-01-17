@@ -24,11 +24,26 @@ function PuzzleItem({ puzzle, type = 'nyt', showRatings, shortenLinks, onClick, 
     const difficultyKey = puzzle.difficultyLevel || puzzle.difficulty;
     const difficultyLevel = difficultyMap[String(difficultyKey).toLowerCase()] || 'easy';
 
-    const renderNYTTag = () => (
-        <div className="nyt-tag" title="New York Times Sudoku">
-            <span className="nyt-icon">T</span> NYT Crossword
-        </div>
-    );
+    const nytInfo = modelHelpers.getNYTInfo(puzzle.id || puzzle.initialDigits || puzzle.digits || '');
+
+    const renderNYTTag = () => {
+        if (!nytInfo) return null;
+        
+        const mainDateString = new Date(puzzle.date || puzzle.lastPlayed).toDateString();
+        const nytDateString = nytInfo.date.toDateString();
+        const showNytDate = mainDateString !== nytDateString;
+
+        return (
+            <div className="nyt-tag" title="New York Times Sudoku">
+                <span className="text-theme-accent font-bold">NYT</span>
+                {showNytDate && (
+                    <span className="opacity-70 ml-1.5 text-xs">
+                        {nytInfo.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                )}
+            </div>
+        );
+    };
 
     const renderStatusBadge = () => {
         if (type === 'nyt') return null;
@@ -48,10 +63,18 @@ function PuzzleItem({ puzzle, type = 'nyt', showRatings, shortenLinks, onClick, 
     let dateStr = 'Unknown Date';
     if (puzzle.date) {
         const d = puzzle.date instanceof Date ? puzzle.date : new Date(puzzle.date);
-        dateStr = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        const formattedDate = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        
+        if (type === 'history' || puzzle.status === 'solved') {
+            dateStr = `Solved ${formattedDate}`;
+        } else if (type === 'in-progress' || puzzle.status === 'draft') {
+            dateStr = `Saved ${formattedDate}`;
+        } else {
+            dateStr = formattedDate;
+        }
     } else if (puzzle.lastPlayed) {
         const d = new Date(puzzle.lastPlayed);
-        dateStr = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        dateStr = `Last played ${d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`;
     }
 
     const defaultActions = type === 'history' ? (
@@ -79,12 +102,14 @@ function PuzzleItem({ puzzle, type = 'nyt', showRatings, shortenLinks, onClick, 
                 <SudokuMiniGrid puzzle={puzzle} size={84} />
                 <div className="puzzle-info">
                     {renderStatusBadge()}
-                    <span className={`difficulty-badge ${difficultyLevel}`}>
-                        {difficultyLevel}
-                    </span>
+                    <div className="puzzle-tags">
+                        <span className={`difficulty-badge ${difficultyLevel}`}>
+                            {difficultyLevel}
+                        </span>
+                        {renderNYTTag()}
+                    </div>
                     <span className="puzzle-date">{dateStr}</span>
                     {timeString && <span className="puzzle-time">{timeString}</span>}
-                    {puzzle.isNYT && renderNYTTag()}
                 </div>
             </a>
             {itemActions && (

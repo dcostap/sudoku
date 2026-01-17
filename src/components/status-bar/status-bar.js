@@ -11,7 +11,7 @@ const stopPropagation = (e) => e.stopPropagation();
 
 function SiteLink () {
     return (
-        <a href="/" className="retro-link text-xs font-bold tracking-widest uppercase">
+        <a href="/" className="retro-link text-sm font-bold tracking-widest uppercase">
              ❮ Sudoku
         </a>
     );
@@ -43,10 +43,13 @@ function StatusBar ({
         ) : null;
 
     const nytBadge = nytInfo ? (
-        <div className="tag-pill hidden lg:flex">
+        <div className="tag-pill flex">
             <span className="text-theme-accent text-sm font-bold tracking-[0.2em]">NYT</span>
-            <span className="text-sm opacity-70">
+            <span className="text-sm opacity-70 hidden sm:inline">
                 {nytInfo.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
+            <span className="text-sm opacity-70 sm:hidden">
+                {nytInfo.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
             <span className="tag-compact">
                 {nytInfo.difficulty}

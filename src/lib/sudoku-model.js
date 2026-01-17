@@ -367,14 +367,25 @@ export const modelHelpers = {
 
     findDifficultyRating: (initialDigits) => {
         // Search in loaded NYT puzzles for difficulty rating
+        const normalized = modelHelpers.normalizeDigits(initialDigits);
         const nytPuzzles = loadNYTPuzzles();
-        const match = nytPuzzles.find(p => p.digits === initialDigits);
+        const match = nytPuzzles.find(p => p.digits === normalized);
         return match ? match.difficulty : null;
     },
 
-    getNYTInfo: (initialDigits) => {
+    getNYTInfo: (idOrDigits) => {
+        if (!idOrDigits) return null;
         const nytPuzzles = loadNYTPuzzles();
-        const match = nytPuzzles.find(p => p.digits === initialDigits);
+        
+        // Try matching by ID first
+        if (typeof idOrDigits === 'string' && idOrDigits.startsWith('nyt:')) {
+            const match = nytPuzzles.find(p => p.id === idOrDigits);
+            if (match) return match;
+        }
+
+        // Try matching by digits
+        const normalized = modelHelpers.normalizeDigits(idOrDigits);
+        const match = nytPuzzles.find(p => p.digits === normalized);
         if (match) {
             return {
                 id: match.id,
@@ -485,7 +496,7 @@ export const modelHelpers = {
                     if (ps) {
                         const nytInfo = modelHelpers.getNYTInfo(ps.initialDigits);
                         ps.isNYT = !!nytInfo;
-                        ps.date = ps.date ? new Date(ps.date) : (nytInfo ? nytInfo.date : new Date(ps.lastUpdatedTime));
+                        ps.date = ps.date ? new Date(ps.date) : new Date(ps.lastUpdatedTime);
                         ps.id = ps.puzzleStateKey;
                     }
                     return ps;
@@ -612,7 +623,7 @@ export const modelHelpers = {
                             historyKey: key,
                             attemptIndex: attemptIndex,
                             isNYT: !!nytInfo,
-                            date: entry.date ? new Date(entry.date) : (nytInfo ? nytInfo.date : new Date(entry.archivedAt)),
+                            date: entry.date ? new Date(entry.date) : new Date(entry.archivedAt),
                         });
                     });
                 } catch (e) {

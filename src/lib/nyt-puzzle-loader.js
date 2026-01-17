@@ -6,15 +6,19 @@
 
 import NYT_PUZZLES_DATA from './nyt_puzzles.json';
 
+let memoizedPuzzles = null;
+
 /**
  * Loads all NYT puzzles from pre-generated data JSON
  * @returns {Array} Array of puzzle objects sorted by date (newest first)
  */
 export function loadNYTPuzzles() {
+    if (memoizedPuzzles) return memoizedPuzzles;
     try {
-        // Convert date strings back to Date objects
+        // Convert date strings back to Date objects and normalize digits
         const puzzles = NYT_PUZZLES_DATA.map(puzzle => ({
             ...puzzle,
+            digits: puzzle.digits.replace(/[.]/g, '0'),
             date: puzzle.date ? new Date(puzzle.date) : null,
         }));
 
@@ -26,6 +30,7 @@ export function loadNYTPuzzles() {
             return b.date.getTime() - a.date.getTime();
         });
 
+        memoizedPuzzles = puzzles;
         return puzzles;
     } catch (error) {
         console.error('Failed to load NYT puzzles from JSON:', error);

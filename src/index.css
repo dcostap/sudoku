@@ -176,6 +176,13 @@
 
     html {
         @apply m-0 w-full h-full;
+        font-size: 14px;
+    }
+
+    @screen md {
+        html {
+            font-size: 18px;
+        }
     }
 
     body {
@@ -311,7 +318,7 @@
     }
 
     .button-icon {
-        @apply w-5 h-5;
+        @apply w-7 h-7;
     }
 
     .tag-pill {
