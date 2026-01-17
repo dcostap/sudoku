@@ -1,17 +1,33 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 import ButtonIcon from '../svg-sprites/button-icon';
+import { isFullscreen, fsApi } from '../../lib/fullscreen-utils';
 
 import './menu-button.css';
 
 
 function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
     const [hidden, setHidden] = useState(true);
+    const containerRef = useRef(null);
 
     const toggleHandler = useCallback(
         () => setHidden(h => !h),
         []
     );
+
+    useEffect(() => {
+        if (hidden) return;
+
+        const clickOutsideHandler = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setHidden(true);
+            }
+        };
+
+        // Use capture phase to catch events even if propagation is stopped (e.g. by the grid)
+        document.addEventListener('mousedown', clickOutsideHandler, true);
+        return () => document.removeEventListener('mousedown', clickOutsideHandler, true);
+    }, [hidden]);
 
     const clickHandler = useCallback(
         e => {
@@ -32,15 +48,10 @@ function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
 
     const showHidePencilmarks = showPencilmarks ? 'Hide' : 'Show';
 
-    const overlay = hidden
-        ? null
-        : <div className="fixed inset-0 z-40" onClick={() => setHidden(true)} />
-
     const shareLinkClass = initialDigits ? '' : 'disabled';
 
     return (
-        <div className="relative flex items-center">
-            { overlay }
+        <div className="relative flex items-center" ref={containerRef}>
             <button 
                 type="button" 
                 title="Menu" 
@@ -82,6 +93,13 @@ function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
                             className="menu-item"
                         >Auto calculate candidates</a>
                     </li>
+                    <li className={shareLinkClass}>
+                        <a 
+                            href="./" 
+                            data-menu-action="show-hint-modal"
+                            className="menu-item"
+                        >Get a hint</a>
+                    </li>
                     <div className="menu-divider" />
                     <li>
                         <a 
@@ -98,6 +116,12 @@ function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
                         >Open in SudokuWiki.org solver</a>
                     </li>
                     <div className="menu-divider" />
+                    <li>
+                        <a 
+                            href="./"
+                            className="menu-item"
+                        >New puzzle</a>
+                    </li>
                     <li className={shareLinkClass}>
                         <a 
                             href="./" 
@@ -115,17 +139,20 @@ function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
                     <div className="menu-divider" />
                     <li>
                         <a 
-                            href="./"
-                            className="menu-item"
-                        >New puzzle</a>
-                    </li>
-                    <li>
-                        <a 
                             href="./" 
                             data-menu-action="show-settings-modal"
-                            className="menu-item"
+                            className="menu-item font-bold text-theme-accent opacity-100"
                         >Settings</a>
                     </li>
+                    {fsApi && (
+                        <li>
+                            <a 
+                                href="./" 
+                                data-menu-action="toggle-fullscreen"
+                                className="menu-item"
+                            >{isFullscreen() ? 'Exit' : 'Enter'} full screen</a>
+                        </li>
+                    )}
                     <li>
                         <a 
                             href="./" 

@@ -1,9 +1,6 @@
 import { modelHelpers } from '../../lib/sudoku-model';
 import TimerWithPause from '../timer-with-pause/timer-with-pause';
 import MenuButton from '../buttons/menu-button';
-import SettingsButton from '../buttons/settings-button';
-import HintButton from '../buttons/hint-button';
-import FullscreenButton from '../buttons/fullscreen-button';
 
 
 const stopPropagation = (e) => e.stopPropagation();
@@ -68,12 +65,6 @@ function StatusBar ({
                     {timer}
                 </div>
                 <div className="app-nav-right">
-                    <div className="hidden md:flex items-center gap-2">
-                        <FullscreenButton />
-                        <HintButton menuHandler={menuHandler} />
-                        <SettingsButton menuHandler={menuHandler} />
-                    </div>
-                    <div className="hidden md:block h-6 border-l border-theme-border mx-2"></div>
                     <MenuButton
                         initialDigits={initialDigits}
                         showPencilmarks={showPencilmarks}

@@ -25,7 +25,6 @@
         --app-font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 
         /* Legacy variable mappings */
-        --background-color: var(--bg-color);
         --status-bar-text-color: var(--text-color);
         --status-bar-bg: var(--bg-color);
         --status-bar-border-color: var(--border-color);
@@ -93,15 +92,15 @@
     .dark {
         /* Dark Mode */
         --bg-color: #000000;
-        --text-color: #ffffff;
-        --surface-color: #0a0a0a;
+        --text-color: #e9e9e9;
+        --surface-color: #181818;
         --surface-header: #111111;
-        --border-color: #333333;
+        --border-color: #363636;
         --accent-color: #4251de;
         --accent-text: #ffffff;
         
         /* High Contrast "Inverse" items */
-        --inverse-bg: #ffffff;
+        --inverse-bg: #d6d6d6;
         --inverse-text: #000000;
 
         /* Scrollbar colors */
@@ -109,26 +108,24 @@
         --scroll-thumb: #333333;
         --scroll-hover: #555555;
 
-        /* Sudoku Grid Variables - EXACT ORIGINAL VALUES RESTORED */
-        --background-color: #3c3637;
-        --grid-line-color: #7b7878;
-        --grid-line-color-bold: #a6a4a4;
+        --grid-line-color: #505050;
+        --grid-line-color-bold: #a8a8a8;
         --grid-line-width: 2;
         --grid-line-width-bold: 5;
-        --mini-grid-line-color: #a6a6a6;
+        --mini-grid-line-color: #5a5a5a;
         --mini-grid-bar-color: #dbcf90;
-        --mini-grid-bar-text-color: #222222;
-        --given-digit-color: #9d9a9a;
+        --mini-grid-bar-text-color: #444444;
+        --given-digit-color: #bbbbbb;
         --visited-digit-color: #666666;
         --paused-digit-color: #7b7272;
-        --digit-color: #6d96e6;
-        --pencil-mark-color: #6c9cfd;
+        --digit-color: #5382e0;
+        --pencil-mark-color: #5d86d8;
         --error-fill-color: #60020278;
         --error-text-color: #b33d3d;
-        --selection-outline-color: #7b9ee1;
-        --selected-fill-color: #3058a48a;
-        --matched-fill-color: #032b779c;
-        --selected-matched-fill-color: #1768ff8a;
+        --selection-outline-color: #194699;
+        --selected-fill-color: #1d48998a;
+        --matched-fill-color: #1d4ea89c;
+        --selected-matched-fill-color: #5e96ff8c;
         --solved-digit-color: #5b77ae;
         --solved-given-digit-color: #595959;
         --solved-fill-color: #77e877;
@@ -314,11 +311,11 @@
     }
 
     .icon-button {
-        @apply w-8 h-8 border border-theme-border bg-theme-surface hover:bg-theme-surfaceHeader transition-colors inline-flex items-center justify-center;
+        @apply w-8 h-8 border border-theme-border bg-theme-surface hover:bg-theme-surfaceHeader transition-colors inline-flex items-center justify-center text-theme-text;
     }
 
     .button-icon {
-        @apply w-7 h-7;
+        @apply w-7 h-7 fill-current;
     }
 
     .tag-pill {

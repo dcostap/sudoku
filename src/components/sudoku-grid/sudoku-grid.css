@@ -27,7 +27,7 @@
     shape-rendering: crispEdges;
 }
 
-.grid-bg { fill: var(--background-color); }
+.grid-bg { fill: var(--bg-color); }
 
 path.selection-outline {
     fill: none;

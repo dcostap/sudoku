@@ -5,6 +5,7 @@ import {saveSvgAsPng} from 'save-svg-as-png';
 import { newSudokuModel, modelHelpers, SETTINGS } from '../../lib/sudoku-model.js';
 import useWindowSize from '../../lib/use-window-size.js';
 import { loadNYTPuzzles } from '../../lib/nyt-puzzle-loader.js';
+import { toggleFullscreen } from '../../lib/fullscreen-utils.js';
 
 import SvgSprites from '../svg-sprites/svg-sprites';
 import StatusBar from '../status-bar/status-bar';
@@ -499,6 +500,9 @@ function dispatchMenuAction(action, setGrid) {
     }
     else if (action === 'save-screenshot') {
         saveScreenshot();
+    }
+    else if (action === 'toggle-fullscreen') {
+        toggleFullscreen();
     }
     else if (action === 'show-hint-modal') {
         setGrid((grid) => modelHelpers.showHintModal(grid));

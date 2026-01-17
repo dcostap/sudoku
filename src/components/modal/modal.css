@@ -85,7 +85,7 @@ input.toggle + .indicator::before {
 }
 
 input.toggle:checked + .indicator::before {
-    @apply translate-x-6 bg-gray-200;
+    @apply translate-x-6 bg-gray-200 dark:bg-gray-900;
 }
 
 /* Specific modal sizes */

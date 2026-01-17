@@ -21,7 +21,7 @@ export default function VirtualKeyboard({ dimensions, inputMode, completedDigits
         const isActive = inputMode === internalMode;
         return (
             <button 
-                className={`btn h-12 sm:h-16 w-12 sm:w-24 active:scale-95 ${isActive ? 'btn-primary' : ''} shrink min-w-0 !px-0.5 sm:px-1`}
+                className={`btn bg-opacity-80  h-12 sm:h-16 w-12 sm:w-24 active:scale-95 ${isActive ? 'btn-primary' : ''} shrink min-w-0 !px-0.5 sm:px-1`}
                 onClick={() => handleAction(`input-mode-${internalMode}`, internalMode === 'color')}
             >
                 <span className="text-[0.61rem] sm:text-base lg:text-xl truncate sm:normal-case font-bold sm:font-normal">{label}</span>
@@ -77,7 +77,7 @@ export default function VirtualKeyboard({ dimensions, inputMode, completedDigits
                         {digitBtn(8)}
                         {digitBtn(9)}
                         <button 
-                            className="btn h-12 sm:h-16 active:scale-95 col-span-3 shrink min-w-0 !px-0"
+                            className="btn bg-opacity-80 h-12 sm:h-16 active:scale-95 col-span-3 shrink min-w-0 !px-0"
                             onClick={() => handleAction('delete')}
                         >
                             <span className="text-sm sm:text-xl truncate">Delete</span>
@@ -91,7 +91,7 @@ export default function VirtualKeyboard({ dimensions, inputMode, completedDigits
                         {actions.map(a => (
                             <button 
                                 key={a.id}
-                                className={`btn h-12 sm:h-16 w-12 sm:w-24 active:scale-95 shrink min-w-0 !px-0.5`}
+                                className={`btn bg-opacity-80 h-12 sm:h-16 w-12 sm:w-24 active:scale-95 shrink min-w-0 !px-0.5`}
                                 onClick={() => handleAction(a.id)}
                             >
                                 <span className="text-[0.61rem] sm:text-base truncate sm:normal-case font-bold sm:font-normal">{a.label}</span>
@@ -103,7 +103,7 @@ export default function VirtualKeyboard({ dimensions, inputMode, completedDigits
                         {actions.map(a => (
                             <button 
                                 key={a.id}
-                                className="btn h-10 sm:h-14 active:scale-95 shrink min-w-0 !px-0"
+                                className="btn bg-opacity-80 h-10 sm:h-14 active:scale-95 shrink min-w-0 !px-0"
                                 onClick={() => handleAction(a.id)}
                             >
                                 <span className="text-xs sm:text-xl truncate">{a.label}</span>
