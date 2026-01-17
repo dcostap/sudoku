@@ -33,7 +33,7 @@ function NYTPuzzleList({ nytPuzzles, showRatings, shortenLinks }) {
     if (!nytPuzzles || nytPuzzles.length === 0) {
         return (
             <div className="nyt-puzzles-empty">
-                No NYT puzzles found. Please check the nyt-scraper/sudoku directory.
+                No NYT puzzles found. Please run the scraper script.
             </div>
         );
     }
