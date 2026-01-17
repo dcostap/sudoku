@@ -176,7 +176,7 @@
 
     html {
         @apply m-0 w-full h-full;
-        font-size: 14px;
+        font-size: 13px;
     }
 
     @screen md {
@@ -314,7 +314,7 @@
     }
 
     .icon-button {
-        @apply w-7 h-7 border border-theme-border bg-theme-surface hover:bg-theme-surfaceHeader transition-colors inline-flex items-center justify-center;
+        @apply w-8 h-8 border border-theme-border bg-theme-surface hover:bg-theme-surfaceHeader transition-colors inline-flex items-center justify-center;
     }
 
     .button-icon {
@@ -322,7 +322,7 @@
     }
 
     .tag-pill {
-        @apply inline-flex items-center gap-2 px-3 py-1 border border-theme-border bg-theme-surface text-sm uppercase tracking-[0.2em];
+        @apply whitespace-nowrap inline-flex items-center gap-2 px-3 py-1 border border-theme-border bg-theme-surface text-sm uppercase tracking-[0.2em];
     }
 
     .tag-compact {

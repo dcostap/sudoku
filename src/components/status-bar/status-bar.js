@@ -11,7 +11,7 @@ const stopPropagation = (e) => e.stopPropagation();
 
 function SiteLink () {
     return (
-        <a href="/" className="retro-link text-sm font-bold tracking-widest uppercase">
+        <a href="/" className="whitespace-nowrap retro-link text-sm font-bold tracking-widest uppercase">
              ❮ Sudoku
         </a>
     );

@@ -39,7 +39,7 @@ function MenuButton ({initialDigits, showPencilmarks, menuHandler}) {
     const shareLinkClass = initialDigits ? '' : 'disabled';
 
     return (
-        <div className="relative">
+        <div className="relative flex items-center">
             { overlay }
             <button 
                 type="button" 
