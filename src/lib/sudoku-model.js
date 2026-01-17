@@ -719,6 +719,97 @@ export const modelHelpers = {
         return historyItems;
     },
 
+    serializeHistoryEntry: (entry) => {
+        try {
+            // Only keep essential fields for the export
+            const exportEntry = {
+                initialDigits: entry.initialDigits,
+                difficultyLevel: entry.difficultyLevel,
+                difficultyRating: entry.difficultyRating,
+                startTime: entry.startTime,
+                endTime: entry.endTime,
+                elapsedTime: entry.elapsedTime,
+                status: entry.status,
+                undoList: entry.undoList,
+                currentSnapshot: entry.currentSnapshot,
+                currentSnapshotTime: entry.currentSnapshotTime,
+                hintsUsed: entry.hintsUsed,
+                archivedAt: entry.archivedAt,
+            };
+            const json = JSON.stringify(exportEntry);
+            // Use btoa safely for UTF-8
+            const bytes = new TextEncoder().encode(json);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        } catch (e) {
+            console.error('Failed to serialize history entry:', e);
+            return null;
+        }
+    },
+
+    deserializeHistoryEntry: (str) => {
+        try {
+            const binary = atob(str);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            const json = new TextDecoder().decode(bytes);
+            return JSON.parse(json);
+        } catch (e) {
+            console.error('Failed to deserialize history entry:', e);
+            return null;
+        }
+    },
+
+    addHistoryEntry: (entry, overwriteConfirmed = false) => {
+        const initialDigits = entry.initialDigits;
+        if (!initialDigits || initialDigits.length !== 81) return { error: 'Invalid puzzle data' };
+
+        const historyKey = 'history-' + initialDigits;
+        let history = [];
+        try {
+            const historyJson = localStorage.getItem(historyKey);
+            if (historyJson) {
+                history = JSON.parse(historyJson);
+            }
+        } catch (e) {
+            // Ignore
+        }
+
+        // Check if this exact attempt (same archivedAt or startTime) already exists
+        const exists = history.some(h => h.archivedAt === entry.archivedAt || (h.startTime === entry.startTime && h.endTime === entry.endTime));
+        
+        if (exists && !overwriteConfirmed) {
+            return { exists: true };
+        }
+
+        if (exists && overwriteConfirmed) {
+            // Remove the old one first
+            history = history.filter(h => !(h.archivedAt === entry.archivedAt || (h.startTime === entry.startTime && h.endTime === entry.endTime)));
+        }
+
+        // Add to history
+        history.unshift(entry);
+        // Sort by archived time (most recent first)
+        history.sort((a, b) => b.archivedAt - a.archivedAt);
+        
+        if (history.length > MAX_HISTORY_PER_PUZZLE) {
+            history = history.slice(0, MAX_HISTORY_PER_PUZZLE);
+        }
+
+        try {
+            localStorage.setItem(historyKey, JSON.stringify(history));
+            return { success: true };
+        } catch (e) {
+            console.error('Failed to save imported history:', e);
+            return { error: 'Storage failed' };
+        }
+    },
+
     // Debug helper - can be called from console
     _debugAddTestHistory: () => {
         const testPuzzle = '530070000600195000098000060800060003400803001700020006060000280000419005000080079';

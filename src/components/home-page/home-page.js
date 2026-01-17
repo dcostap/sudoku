@@ -141,6 +141,45 @@ function HomePage({ nytPuzzles, showRatings, shortenLinks, onNewPuzzle, onImport
         }
     };
 
+    const handleCopyHistory = (entry) => {
+        const serialized = modelHelpers.serializeHistoryEntry(entry);
+        if (serialized) {
+            navigator.clipboard.writeText(serialized).then(() => {
+                alert('Puzzle history copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard.');
+            });
+        }
+    };
+
+    const handleImportHistory = () => {
+        const str = window.prompt('Paste the puzzle history string:');
+        if (!str) return;
+
+        const entry = modelHelpers.deserializeHistoryEntry(str.trim());
+        if (!entry) {
+            alert('Invalid history string.');
+            return;
+        }
+
+        const result = modelHelpers.addHistoryEntry(entry);
+        if (result.exists) {
+            if (window.confirm('This puzzle entry already exists in your history. Do you want to overwrite it?')) {
+                const secondResult = modelHelpers.addHistoryEntry(entry, true);
+                if (secondResult.success) {
+                    alert('Puzzle history imported and updated!');
+                    loadPuzzles();
+                }
+            }
+        } else if (result.success) {
+            alert('Puzzle history imported successfully!');
+            loadPuzzles();
+        } else if (result.error) {
+            alert('Error: ' + result.error);
+        }
+    };
+
     const renderInProgressPuzzles = () => {
         if (inProgressPuzzles.length === 0) {
             return (
@@ -199,8 +238,43 @@ function HomePage({ nytPuzzles, showRatings, shortenLinks, onNewPuzzle, onImport
                         showRatings={showRatings}
                         shortenLinks={shortenLinks}
                         type="history"
+                        actions={
+                            <>
+                                <a 
+                                    href={`${modelHelpers.getPuzzleUrl(entry, shortenLinks)}&replay=1`} 
+                                    className="btn-small btn-secondary"
+                                >
+                                    ▶ Replay
+                                </a>
+                                <button 
+                                    className="btn-small btn-secondary"
+                                    onClick={() => handleCopyHistory(entry)}
+                                >
+                                    ⎘ Copy
+                                </button>
+                                <a 
+                                    href={`${modelHelpers.getPuzzleUrl(entry, shortenLinks)}&restart=1`} 
+                                    className="btn-small btn-primary"
+                                >
+                                    ↻ Again
+                                </a>
+                            </>
+                        }
                     />
                 ))}
+                <div className="history-footer mt-6 flex justify-center">
+                    <button 
+                        className="text-sm opacity-70 hover:opacity-100 hover:underline flex items-center gap-2 text-theme-text"
+                        onClick={handleImportHistory}
+                    >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Add completed puzzle from copied string
+                    </button>
+                </div>
             </div>
         );
     };
