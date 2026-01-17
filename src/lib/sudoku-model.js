@@ -98,7 +98,7 @@ function newCell(index, digit) {
     });
 }
 
-export function newSudokuModel({initialDigits, difficultyLevel, onPuzzleStateChange, entryPoint, skipCheck, showModal, mode: forcedMode}) {
+export function newSudokuModel({initialDigits, difficultyLevel, onPuzzleStateChange, entryPoint, skipCheck, showModal, mode: forcedMode, restart}) {
     initialDigits = modelHelpers.normalizeDigits(initialDigits);
     const initialError = skipCheck ? undefined : modelHelpers.initialErrorCheck(initialDigits);
     const mode = forcedMode || ((initialError || initialDigits === '0'.repeat(81)) ? 'enter' : 'solve');
@@ -132,7 +132,7 @@ export function newSudokuModel({initialDigits, difficultyLevel, onPuzzleStateCha
     });
     return initialError
         ? modelHelpers.setInitialDigits(grid, initialDigits, initialError, entryPoint, {showModal})
-        : modelHelpers.setGivenDigits(grid, initialDigits, {skipCheck, showModal});
+        : modelHelpers.setGivenDigits(grid, initialDigits, {skipCheck, showModal, isRestart: restart});
 };
 
 function actionsBlocked(grid) {
@@ -317,7 +317,7 @@ export const modelHelpers = {
             });
         }
         const autoSaveEnabled = modelHelpers.getSetting(grid, SETTINGS.autoSave);
-        if (!options.fromPuzzleState && autoSaveEnabled) {
+        if (!options.fromPuzzleState && autoSaveEnabled && !options.isRestart) {
             const puzzleState = modelHelpers.parsePuzzleState(puzzleStateKey);
             if (puzzleState) {
                 grid = grid.set('modalState', {
@@ -325,6 +325,20 @@ export const modelHelpers = {
                     puzzleState,
                     showRatings: modelHelpers.getSetting(grid, SETTINGS.showRatings),
                 });
+            } else {
+                const history = modelHelpers.getPuzzleHistory(initialDigits);
+                if (history.length > 0) {
+                    const lastEntry = history[0]; // history.unshift adds to front
+                    grid = grid.set('modalState', {
+                        modalType: MODAL_TYPE_RESUME_OR_RESTART,
+                        puzzleState: {
+                            ...lastEntry,
+                            puzzleStateKey: 'history-' + initialDigits
+                        },
+                        isHistory: true,
+                        showRatings: modelHelpers.getSetting(grid, SETTINGS.showRatings),
+                    });
+                }
             }
         }
         return grid;
@@ -1344,6 +1358,15 @@ export const modelHelpers = {
             // achieves similar through a link.
             return modelHelpers.restoreFromPuzzleState(grid, args.puzzleStateKey);
         }
+        else if (action === 'replay-solved-puzzle') {
+            const initialDigits = grid.get('initialDigits');
+            const shortenLinks = modelHelpers.getSetting(grid, SETTINGS.shortenLinks);
+            const history = modelHelpers.getPuzzleHistory(initialDigits);
+            const entry = history[0];
+            const baseUrl = modelHelpers.getPuzzleUrl(entry || {initialDigits}, shortenLinks);
+            window.location.href = baseUrl + '&replay=1&attempt=0';
+            return grid;
+        }
         else if (action === 'restart-over-saved-puzzle') {
             return modelHelpers.restartOverSavedPuzzle(grid, args.puzzleStateKey);
         }
@@ -1477,7 +1500,9 @@ export const modelHelpers = {
     },
 
     restartOverSavedPuzzle: (grid, puzzleStateKey) => {
-        localStorage.removeItem(puzzleStateKey);
+        if (puzzleStateKey && !puzzleStateKey.startsWith('history-')) {
+            localStorage.removeItem(puzzleStateKey);
+        }
         grid = grid.set("startTime", Date.now());
         return grid;
     },

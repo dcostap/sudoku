@@ -86,7 +86,7 @@ function PuzzleItem({ puzzle, type = 'nyt', showRatings, shortenLinks, onClick, 
                 ▶ Replay
             </a>
             <a 
-                href={puzzleUrl} 
+                href={type === 'history' ? `${puzzleUrl}&restart=1` : puzzleUrl} 
                 className="btn-small btn-primary"
             >
                 {puzzle.status === 'draft' || puzzle.mode === 'enter' ? '✎ Resume' : '↻ Again'}

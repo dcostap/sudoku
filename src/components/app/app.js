@@ -90,6 +90,8 @@ function initialGridFromURL () {
         difficultyLevel: params.get('d'),
         skipCheck: params.get('r') === '1',
         mode: params.get('mode'),
+        restart: params.get('restart') === '1',
+        showModal: true,
         onPuzzleStateChange: grid => {
             document.body.dataset.currentSnapshot = grid.get('currentSnapshot');
             modelHelpers.persistPuzzleState(grid);
@@ -756,7 +758,7 @@ function App() {
     }
 
     const classes = [`sudoku-app mode-${mode} ${dimensions.orientation}`];
-    if (solved) {
+    if (solved && mode !== 'replay') {
         classes.push('solved');
     }
     if (pausedAt) {
