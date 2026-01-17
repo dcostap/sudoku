@@ -86,13 +86,13 @@ p {
 }
 
 .panel {
-    @apply border border-theme-border bg-theme-surface p-4;
+    /* @apply border border-theme-border bg-theme-surface p-4; */
 }
 
 /* Puzzle Lists & Items */
 .saved-puzzles-list,
 .history-puzzles-list {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4;
 }
 
 .nyt-puzzles-list {
