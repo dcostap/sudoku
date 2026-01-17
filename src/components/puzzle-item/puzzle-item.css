@@ -44,6 +44,10 @@
     @apply text-xs uppercase tracking-widest;
 }
 
+.puzzle-description {
+    @apply text-xs italic opacity-70 mt-1 truncate max-w-full;
+}
+
 .puzzle-item.nyt .puzzle-time {
     @apply hidden;
 }

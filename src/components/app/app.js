@@ -154,6 +154,12 @@ function indexFromCellEvent (e) {
 }
 
 function cellMouseDownHandler (e, setGrid) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'LABEL') {
+        return;
+    }
+    if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) {
+        document.activeElement.blur();
+    }
     e.stopPropagation();
     const index = indexFromCellEvent(e);
     if (index === undefined) {
@@ -172,6 +178,9 @@ function cellMouseDownHandler (e, setGrid) {
 }
 
 function cellMouseOverHandler (e, setGrid) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+    }
     e.stopPropagation();
     if ((e.buttons & 1) === 1) {
         const index = indexFromCellEvent(e);
@@ -181,6 +190,9 @@ function cellMouseOverHandler (e, setGrid) {
 }
 
 function docKeyDownHandler (e, modalActive, setGrid, solved, inputMode) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+    }
     if (solved) {
         return;
     }
@@ -336,6 +348,9 @@ function escapeFromModal(setGrid) {
 }
 
 function docKeyUpHandler(e, modalActive, setGrid) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        return;
+    }
     if (modalActive) {
         return;
     }
@@ -567,6 +582,11 @@ function App() {
     const completedDigits = grid ? grid.get('completedDigits') : {};
     const modalState = grid ? grid.get('modalState') : undefined;
 
+    const handleDescriptionChange = useCallback((e) => {
+        const val = e.target.value;
+        setGrid(g => g ? g.set('description', val) : g);
+    }, []);
+
     const handleStart = useCallback((e) => {
         if (e) e.preventDefault();
         const digits = modelHelpers.asDigits(grid);
@@ -576,20 +596,49 @@ function App() {
         setGrid(grid => {
             const nextGrid = modelHelpers.setGivenDigits(grid, digits, { skipCheck: false });
             const now = Date.now();
-            return nextGrid.merge({
+            const resultGrid = nextGrid.merge({
                 mode: 'solve',
                 startTime: now,
                 intervalStartTime: now,
                 pausedAt: undefined
             });
+            // Persist immediately so it appears in saved puzzles
+            modelHelpers.persistPuzzleState(resultGrid);
+            return resultGrid;
         });
     }, [grid]);
 
+    const description = grid ? grid.get('description') : '';
+    const currentDigits = grid && mode === 'enter' ? modelHelpers.asDigits(grid) : '';
+    const matchingNYT = mode === 'enter' && currentDigits && currentDigits !== '0'.repeat(81) ? modelHelpers.getNYTInfo(currentDigits) : null;
+
     const startButton = mode === 'enter'
         ? (
-            <div className="flex justify-center mt-0">
+            <div className="flex flex-col items-center mt-2 w-full max-w-[400px] mx-auto px-4">
+                <div className="w-full mb-4">
+                    <label htmlFor="puzzle-description" className="block text-theme-accent text-xs font-bold mb-1 uppercase tracking-widest opacity-70">
+                        Puzzle Description
+                    </label>
+                    <input
+                        id="puzzle-description"
+                        type="text"
+                        className="w-full bg-theme-surface border border-theme-border rounded px-3 py-2 text-theme-text focus:outline-none focus:border-theme-accent transition-colors select-text"
+                        placeholder="e.g. My Custom Hard Puzzle"
+                        value={description || ''}
+                        onChange={handleDescriptionChange}
+                    />
+                </div>
+                
+                {matchingNYT && (
+                    <div className="mb-4 p-3 bg-orange-900/20 border border-orange-500/50 rounded text-sm text-orange-200">
+                        <span className="font-bold block mb-1">⚠️ ID Collision</span>
+                        This layout matches a static NYT {matchingNYT.difficulty} puzzle ({matchingNYT.date.toLocaleDateString()}). 
+                        Custom metadata might be overridden.
+                    </div>
+                )}
+
                 <button 
-                    className="ui-btn-primary text-xl px-6 py-3" 
+                    className="ui-btn-primary text-xl px-6 py-3 w-full" 
                     onClick={handleStart}
                 >
                     START PUZZLE

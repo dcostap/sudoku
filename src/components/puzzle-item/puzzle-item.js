@@ -110,6 +110,11 @@ function PuzzleItem({ puzzle, type = 'nyt', showRatings, shortenLinks, onClick, 
                     </div>
                     <span className="puzzle-date">{dateStr}</span>
                     {timeString && <span className="puzzle-time">{timeString}</span>}
+                    {puzzle.description && (
+                        <div className="puzzle-description" title={puzzle.description}>
+                            {puzzle.description.length > 40 ? puzzle.description.substring(0, 37) + '...' : puzzle.description}
+                        </div>
+                    )}
                 </div>
             </a>
             {itemActions && (

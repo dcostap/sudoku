@@ -128,6 +128,7 @@ export function newSudokuModel({initialDigits, difficultyLevel, onPuzzleStateCha
         focusIndex: null,
         completedDigits: {},
         matchDigit: '0',
+        description: '',
         modalState: undefined,
         hintsUsed: emptySet,
     });
@@ -1690,6 +1691,7 @@ export const modelHelpers = {
                 currentSnapshot: currentSnapshot,
                 currentSnapshotTime: grid.get('currentSnapshotTime') || 0,
                 hintsUsed: grid.get('hintsUsed').toArray(),
+                description: grid.get('description') || '',
                 lastUpdatedTime: Date.now(),
             };
             const difficultyRating = grid.get('difficultyRating');
@@ -1771,6 +1773,7 @@ export const modelHelpers = {
             redoList: List(puzzleState.redoList),
             currentSnapshotTime: puzzleState.currentSnapshotTime || 0,
             hintsUsed: Set(puzzleState.hintsUsed || []),
+            description: puzzleState.description || '',
             pausedAt: undefined,
             modalState: undefined,
         });
