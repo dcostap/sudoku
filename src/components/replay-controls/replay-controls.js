@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import './replay-controls.css';
 
 function ReplayControls({ grid, setGrid, modelHelpers }) {
@@ -7,13 +7,16 @@ function ReplayControls({ grid, setGrid, modelHelpers }) {
     
     const replayStep = grid.get('replayStep');
     const replayHistory = grid.get('replayHistory');
-    const totalSteps = replayHistory.size - 1;
+    const totalSteps = replayHistory.size;
     const startTime = grid.get('startTime');
     const endTime = grid.get('endTime');
     const solved = grid.get('solved');
     
     const currentSnapshotTime = grid.get('currentSnapshotTime') || 0;
     const totalTime = endTime - startTime;
+
+    const totalMoves = useMemo(() => replayHistory.filter(h => h.a).size, [replayHistory]);
+    const currentMove = useMemo(() => replayHistory.slice(0, replayStep).filter(h => h.a).size, [replayHistory, replayStep]);
     
     const formatTime = (ms) => {
         const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -23,11 +26,11 @@ function ReplayControls({ grid, setGrid, modelHelpers }) {
     };
     
     const stepForward = useCallback(() => {
-        setGrid(g => modelHelpers.replayStepForward(g));
+        setGrid(g => modelHelpers.replayNextMove(g));
     }, [setGrid, modelHelpers]);
     
     const stepBackward = useCallback(() => {
-        setGrid(g => modelHelpers.replayStepBackward(g));
+        setGrid(g => modelHelpers.replayPrevMove(g));
     }, [setGrid, modelHelpers]);
     
     const goToStart = useCallback(() => {
@@ -57,7 +60,7 @@ function ReplayControls({ grid, setGrid, modelHelpers }) {
                 const currentStep = g.get('replayStep');
                 const history = g.get('replayHistory');
                 
-                if (currentStep >= history.size - 1) {
+                if (currentStep >= history.size) {
                     setIsPlaying(false);
                     return g;
                 }
@@ -80,7 +83,7 @@ function ReplayControls({ grid, setGrid, modelHelpers }) {
                 <div className="flex items-center gap-3">
                     <h2 className="hidden sm:block">Replay Mode</h2>
                     <span className="replay-step-info">
-                        Move {replayStep} of {totalSteps}
+                        Move {currentMove} of {totalMoves}
                     </span>
                     <span className={`replay-status ${statusClass}`}>{statusText}</span>
                     <span className="replay-time">

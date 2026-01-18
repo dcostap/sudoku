@@ -23,11 +23,15 @@
 }
 
 .replay-time {
-    @apply text-sm uppercase tracking-widest opacity-70;
+    @apply text-sm uppercase tracking-widest opacity-70 inline-block;
+    font-variant-numeric: tabular-nums;
+    min-width: 8rem;
 }
 
 .replay-step-info {
-    @apply text-sm uppercase tracking-widest;
+    @apply text-sm uppercase tracking-widest inline-block;
+    font-variant-numeric: tabular-nums;
+    min-width: 10.5rem;
 }
 
 .replay-main-controls {
@@ -124,7 +128,7 @@
     }
     
     .replay-buttons {
-        @apply w-full justify-between;
+        @apply w-full;
     }
     
     .replay-slider-container {

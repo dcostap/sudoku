@@ -86,6 +86,10 @@ class NMList {
         return this._new_list(this[_nm_list].filter(f));
     }
 
+    slice (...args) {
+        return this._new_list(this[_nm_list].slice(...args));
+    }
+
     reduce (...args) {
         return this[_nm_list].reduce(...args);
     }

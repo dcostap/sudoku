@@ -920,6 +920,17 @@ export const modelHelpers = {
         return grid;
     },
 
+    replayNextMove: (grid) => {
+        const history = grid.get('replayHistory');
+        let nextGrid = grid;
+        let s;
+        do {
+            nextGrid = modelHelpers.replayStepForward(nextGrid);
+            s = nextGrid.get('replayStep');
+        } while (s < history.size && !history.get(s - 1).a);
+        return nextGrid;
+    },
+
     replayStepBackward: (grid) => {
         const currentStep = grid.get('replayStep');
         
@@ -945,6 +956,17 @@ export const modelHelpers = {
         
         grid = modelHelpers.checkCompletedDigits(grid);
         return grid;
+    },
+
+    replayPrevMove: (grid) => {
+        const history = grid.get('replayHistory');
+        let nextGrid = grid;
+        let s;
+        do {
+            nextGrid = modelHelpers.replayStepBackward(nextGrid);
+            s = nextGrid.get('replayStep');
+        } while (s > 0 && !history.get(s - 1).a);
+        return nextGrid;
     },
 
     replayGoToStep: (grid, step) => {
