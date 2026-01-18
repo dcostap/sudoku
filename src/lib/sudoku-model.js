@@ -139,6 +139,7 @@ export function newSudokuModel({initialDigits, difficultyLevel, onPuzzleStateCha
 
 function actionsBlocked(grid) {
     if (!grid) return false;
+    if (grid.get('mode') === 'replay') return false;
     return grid.get('solved') || (grid.get('modalState') !== undefined);
 }
 
@@ -182,7 +183,7 @@ export const modelHelpers = {
         const currentSnapshotTime = historyEntry.currentSnapshotTime || historyEntry.elapsedTime || 0;
         
         const fullHistory = [];
-        const GAP_THRESHOLD = 30000; // 1 minute in milliseconds
+        const GAP_THRESHOLD = 1000;
         
         // Add all snapshots from undoList
         undoList.forEach((entry) => {

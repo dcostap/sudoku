@@ -190,11 +190,11 @@ function cellMouseOverHandler (e, setGrid) {
     }
 }
 
-function docKeyDownHandler (e, modalActive, setGrid, solved, inputMode) {
+function docKeyDownHandler (e, modalActive, setGrid, solved, inputMode, mode) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         return;
     }
-    if (solved) {
+    if (solved && mode !== 'replay') {
         return;
     }
     const keyName = e.code;
@@ -234,7 +234,7 @@ function docKeyDownHandler (e, modalActive, setGrid, solved, inputMode) {
         e.preventDefault();
         return;
     }
-    else if (keyName === "Backspace" || keyName === "Delete") {
+    else if (keyName === "Backspace" || keyName === "Delete" || keyName === "Space") {
         if (e.target === document.body) {
             // We don't want browser to treat this as a back button action
             e.preventDefault();
@@ -262,17 +262,17 @@ function docKeyDownHandler (e, modalActive, setGrid, solved, inputMode) {
         setGrid((grid) => modelHelpers.redoOneAction(grid));
         return;
     }
-    else if (keyName === "ArrowRight" || keyName === "KeyD") {
+    else if (keyName === "ArrowRight" || keyName === "KeyD" || keyName === "KeyL") {
         setGrid((grid) => modelHelpers.moveFocus(grid, 1, 0, shiftOrCtrl));
         e.preventDefault();
         return;
     }
-    else if (keyName === "ArrowLeft" || keyName === "KeyA") {
+    else if (keyName === "ArrowLeft" || keyName === "KeyA" || keyName === "KeyJ") {
         setGrid((grid) => modelHelpers.moveFocus(grid, -1, 0, shiftOrCtrl));
         e.preventDefault();
         return;
     }
-    else if (keyName === "ArrowUp" || keyName === "KeyW") {
+    else if (keyName === "ArrowUp" || keyName === "KeyW" || keyName === "KeyI") {
         setGrid((grid) => modelHelpers.moveFocus(grid, 0, -1, shiftOrCtrl));
         // Don't prevent Cmd-W closing the window (#32)
         if (!(ctrlOrMeta && keyName === "KeyW")) {
@@ -280,7 +280,7 @@ function docKeyDownHandler (e, modalActive, setGrid, solved, inputMode) {
         }
         return;
     }
-    else if (keyName === "ArrowDown" || keyName === "KeyS") {
+    else if (keyName === "ArrowDown" || keyName === "KeyS" || keyName === "KeyK") {
         setGrid((grid) => modelHelpers.moveFocus(grid, 0, 1, shiftOrCtrl));
         e.preventDefault();
         return;
@@ -307,10 +307,6 @@ function docKeyDownHandler (e, modalActive, setGrid, solved, inputMode) {
     }
     else if (keyName === "Home") {
         setGrid((grid) => modelHelpers.applySelectionOp(grid, 'setSelection', modelHelpers.CENTER_CELL));
-        return;
-    }
-    else if (keyName === "Space") {
-        setGrid((grid) => modelHelpers.applySelectionOp(grid, 'toggleExtendSelection', grid.get('focusIndex')));
         return;
     }
     else if (e.key === "Control" || e.key === "Meta") {
@@ -707,7 +703,7 @@ function App() {
 
     useEffect(
         () => {
-            const pressHandler = (e) => docKeyDownHandler(e, modalActive, setGrid, solved, inputMode);
+            const pressHandler = (e) => docKeyDownHandler(e, modalActive, setGrid, solved, inputMode, mode);
             document.addEventListener('keydown', pressHandler);
             const releaseHandler = (e) => docKeyUpHandler(e, modalActive, setGrid);
             document.addEventListener('keyup', releaseHandler);
@@ -716,7 +712,7 @@ function App() {
                 document.removeEventListener('keyup', releaseHandler)
             };
         },
-        [solved, inputMode, modalActive]
+        [solved, inputMode, modalActive, mode]
     );
 
     useEffect(
@@ -876,9 +872,9 @@ function App() {
                     gridId="main-grid"
                     dimensions={dimensions}
                     isPaused={!!pausedAt}
-                    mouseDownHandler={isReplayMode ? null : mouseDownHandler}
-                    mouseOverHandler={isReplayMode ? null : mouseOverHandler}
-                    inputHandler={isReplayMode ? null : inputHandler}
+                    mouseDownHandler={mouseDownHandler}
+                    mouseOverHandler={mouseOverHandler}
+                    inputHandler={inputHandler}
                 />
                 <div>
                     {

@@ -33,7 +33,6 @@ export default function HelpPage({modalHandler}) {
                 <li>click or tap and drag to select multiple cells</li>
                 <li>use Shift-click or Ctrl-click to select additional cells</li>
                 <li>use Shift or Ctrl with the arrow keys to extend the selection</li>
-                <li>use Shift-space or Ctrl-space to select or unselect the current cell</li>
             </ul>
             <p>Don’t worry if your selection includes cells which already contain completed
             digits - these cells will not be affected by entering pencil marks.</p>
@@ -78,13 +77,13 @@ export default function HelpPage({modalHandler}) {
 
             <h2>Alternate cursor movement keys</h2>
 
-            <p>In addition to the arrow keys, the 'WASD' keys may be used as follows:</p>
+            <p>In addition to the arrow keys, the 'WASD' or 'IJKL' keys may be used as follows:</p>
 
             <ul>
-                <li><b>W</b> - Up</li>
-                <li><b>A</b> - Left</li>
-                <li><b>S</b> - Down</li>
-                <li><b>D</b> - Right</li>
+                <li><b>W</b> or <b>I</b> - Up</li>
+                <li><b>A</b> or <b>J</b> - Left</li>
+                <li><b>S</b> or <b>K</b> - Down</li>
+                <li><b>D</b> or <b>L</b> - Right</li>
             </ul>
 
             <p>These keys can be combined with Ctrl or Shift to extend the selection,
@@ -96,8 +95,8 @@ export default function HelpPage({modalHandler}) {
             or the undo button on the on-screen keypad.</p>
             <p>After using undo, you can use Ctrl-Y or, or ‘]’, or the on-screen redo button
             to replay one or more actions.</p>
-            <p>You can use Delete or Backspace to remove a digit or pencil marks from
-            selected cells.</p>
+            <p>You can use <b>Delete</b>, <b>Backspace</b>, or <b>Space</b> to remove a digit 
+            or pencil marks from selected cells.</p>
             <p>The Esc key will cancel the current selection.</p>
 
             <h1>Settings</h1>

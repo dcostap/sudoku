@@ -52,12 +52,12 @@
 }
 
 .replay-indicator {
-    @apply absolute w-1 h-1 rounded-full opacity-60;
+    @apply absolute w-1 h-1 rounded-sm opacity-50;
     transform: translateX(-50%);
 }
 
 .indicator-setDigit {
-    @apply bg-blue-500;
+    @apply bg-blue-700 h-2 opacity-90;
 }
 
 .indicator-toggleInnerPencilMark,
